@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAudio } from '../hooks/useAudio';
 import {
   WebArchitectureCanvas,
@@ -16,79 +16,78 @@ export default function Timeline() {
   const epochs = [
     {
       epoch: '01',
-      date: 'SEP 2024 – MAR 2025',
+      date: '2024 – 2025',
       stageLabel: 'STAGE 01',
       category: 'THE FOUNDATION',
       dockLabel: 'FOUNDATIONS',
-      title: 'Web Foundations & CS Basics',
-      headline: 'HTML5, CSS3, JavaScript & Java',
+      title: 'Programming Foundations & Web Basics',
+      headline: 'Problem-solving, web fundamentals, and software thinking',
       summary:
-        'Started my engineering journey at ABES Engineering College in September 2024. Built a solid foundation in web development with HTML5, CSS3, and JavaScript while mastering Java for object-oriented programming and data structures. Explored Python basics and began building my algorithmic problem-solving skills.',
+        'Built a solid foundation in programming, logic, and web development while preparing for deeper work in AI/ML and software engineering. Focused on learning clean problem solving and creating practical understanding of front-end and data-driven systems.',
       metrics: [
-        { label: 'Timeline', value: 'Sep 2024 – Mar 2025' },
-        { label: 'College', value: 'ABES Engg. College' },
-        { label: 'Core Tools', value: 'HTML, CSS, Java, JS' }
+        { label: 'Focus', value: 'CS Foundations' },
+        { label: 'College', value: 'ABES Engineering College' },
+        { label: 'Area', value: 'Web + Logic' }
       ],
-      techStack: ['HTML5', 'CSS3', 'JavaScript', 'Java', 'Python Basics', 'Git'],
+      techStack: ['Web Fundamentals', 'Programming Logic', 'Data Structures', 'Problem Solving'],
       Visualizer: WebArchitectureCanvas
     },
     {
       epoch: '02',
-      date: 'SEP 2025',
+      date: '2025',
       stageLabel: 'STAGE 02',
-      category: 'FIRST PROJECT SPRINT',
-      dockLabel: 'FIRST PROJECT',
-      title: 'NutroHeist: Food Safety Scanner',
-      headline: 'AI-Powered Ingredient Analysis Web App',
+      category: 'AI PROJECT',
+      dockLabel: 'RECOMMENDER',
+      title: 'Movie Recommendation System',
+      headline: 'Data-driven recommendation project',
       summary:
-        'Built NutroHeist in September 2025 — a web application that scans packaged food ingredients and determines whether they are safe to eat. Designed a clean, responsive landing page and integrated AI ingredient analysis logic. The project received a fork from the community, validating its real-world utility.',
+        'Developed a movie recommendation system project centered on identifying relevant suggestions through preference patterns and similarity-based analysis. This work reflects a practical, AI/ML-first approach to discovery and user-focused recommendation logic.',
       metrics: [
-        { label: 'Launched', value: 'Sep 2025' },
-        { label: 'Community', value: '1 Fork' },
-        { label: 'Tech', value: 'HTML, CSS, JS' }
+        { label: 'Project', value: 'Movie Recs' },
+        { label: 'Field', value: 'AI/ML' },
+        { label: 'Focus', value: 'Recommendation' }
       ],
-      techStack: ['HTML5', 'CSS3', 'JavaScript', 'AI Integration', 'Responsive Design'],
+      techStack: ['Python', 'Machine Learning', 'Recommendation Logic', 'Data Analysis'],
       Visualizer: ChatUpSocketStreamCanvas
     },
     {
       epoch: '03',
-      date: 'AUG 2026',
+      date: '2025 – 2026',
       stageLabel: 'STAGE 03',
-      category: 'SECURITY & AI SPRINT',
-      dockLabel: 'AI SECURITY',
-      title: 'Defensys: AI Cybersecurity System',
-      headline: 'Python-Based AI Defense Platform',
+      category: 'SECURITY & SYSTEMS',
+      dockLabel: 'SYSTEMS',
+      title: 'CipherCraft+',
+      headline: 'Security and cryptography-focused project',
       summary:
-        'Engineered Defensys in August 2026 — an AI-powered cybersecurity defense platform built with Python. The system leverages machine learning to detect threats, analyze anomalies, and automate defense responses. Also achieved Semi-Finalist in Smart India Hackathon (SIH) and participated in HackaMania hackathon.',
+        'Explored a cipher-based software project focused on message transformation, secure patterns, and practical encryption workflows. This stage emphasized structured thinking around system security and applied software design.',
       metrics: [
-        { label: 'Launched', value: 'Aug 2026' },
-        { label: 'Tech', value: 'Python + AI/ML' },
-        { label: 'Achievement', value: 'SIH Semi-Finalist' }
+        { label: 'Project', value: 'CipherCraft+' },
+        { label: 'Field', value: 'Security' },
+        { label: 'Focus', value: 'Cryptography' }
       ],
-      techStack: ['Python', 'Machine Learning', 'AI/ML', 'Cybersecurity', 'Data Analysis', 'Backend APIs'],
+      techStack: ['Python', 'Security Concepts', 'Cryptography', 'Problem Solving'],
       Visualizer: RoastingAITokenStreamCanvas
     },
     {
       epoch: '04',
-      date: 'AUG 2026 – PRESENT',
+      date: '2026',
       stageLabel: 'STAGE 04',
-      category: 'PROFESSIONAL INTERNSHIP',
-      dockLabel: 'INTERNSHIP',
-      title: 'AI Backend Engineer at FlyRank AI',
-      headline: 'Remote Internship • AI-Powered SEO Platform',
+      category: 'RISK ANALYSIS',
+      dockLabel: 'RISK',
+      title: 'Bank Default Risk Predictor',
+      headline: 'Finance-focused predictive modeling project',
       summary:
-        'Currently working as an AI Backend Engineer Intern at FlyRank AI. FlyRank is building the autopilot for organic growth — automating how brands appear in both classic and next-gen AI search engines. Applying full-stack and AI skills in a real production environment to deliver scalable backend solutions.',
+        'Built a risk prediction project exploring default likelihood patterns through structured data analysis and machine learning-based forecasting. This focus reflects a practical interest in data-driven decision support and applied AI in finance.',
       metrics: [
-        { label: 'Role', value: 'AI Backend Intern' },
-        { label: 'Company', value: 'FlyRank AI' },
-        { label: 'Mode', value: 'Remote' }
+        { label: 'Project', value: 'Risk Predictor' },
+        { label: 'Field', value: 'Finance' },
+        { label: 'Focus', value: 'Prediction' }
       ],
-      techStack: ['Node.js', 'Python', 'AI Integration', 'REST APIs', 'Backend Development', 'SEO Automation'],
+      techStack: ['Python', 'Machine Learning', 'Risk Modeling', 'Data Science'],
       Visualizer: EdgeResumeATSParserCanvas
     }
   ];
 
-  // Auto-running loop across 4 stages (pauses on hover so user can read)
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
@@ -98,7 +97,6 @@ export default function Timeline() {
     return () => clearInterval(interval);
   }, [isPaused, epochs.length]);
 
-  // Move button controls (loops infinitely in both directions)
   const handleNext = useCallback(() => {
     playClickSound();
     setActiveEpochIndex((prev) => (prev + 1) % epochs.length);
@@ -115,7 +113,6 @@ export default function Timeline() {
     setActiveEpochIndex(targetIndex);
   }, [epochs.length, playClickSound]);
 
-  // Keyboard Arrow navigation for accessibility
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -131,7 +128,6 @@ export default function Timeline() {
 
   return (
     <section className="container timeline-section" id="experience">
-      {/* Aligned Section Header matching #about, #work, #skills */}
       <div className="timeline-header">
         <div className="gsap-reveal">
           <MaskedTitle text="Engineering Journey" />
@@ -161,7 +157,6 @@ export default function Timeline() {
         </div>
       </div>
 
-      {/* Interactive Stage Slider with Side Navigation Arrows & Auto-running Loop */}
       <div
         className="timeline-stage-wrapper"
         onMouseEnter={() => setIsPaused(true)}
@@ -195,9 +190,7 @@ export default function Timeline() {
                     if (!isActive) playHoverSound();
                   }}
                 >
-                  {/* Stage Container Card */}
                   <div className="timeline-stage-card hoverable">
-                    {/* Left Pane: Narrative & Technical Telemetry */}
                     <div className="timeline-narrative-pane">
                       <div className="stage-topbar font-mono">
                         <div className="stage-topbar-left">
@@ -214,7 +207,6 @@ export default function Timeline() {
 
                       <p className="stage-summary text-gray">{item.summary}</p>
 
-                      {/* Telemetry Metrics Grid */}
                       <div className="stage-metrics-grid font-mono">
                         {item.metrics.map((m, mIdx) => (
                           <div key={mIdx} className="stage-metric-box">
@@ -224,7 +216,6 @@ export default function Timeline() {
                         ))}
                       </div>
 
-                      {/* Tech Stack Pills matching .skill-pill */}
                       <div className="stage-tech-pills font-mono">
                         {item.techStack.map((tech, tIdx) => (
                           <span key={tIdx} className="stage-pill">
@@ -234,7 +225,6 @@ export default function Timeline() {
                       </div>
                     </div>
 
-                    {/* Right Pane: 2D Live Visualizer Canvas */}
                     <div className="timeline-simulation-pane">
                       <div className="terminal-canvas-wrapper">
                         <Visualizer isActive={isActive} />

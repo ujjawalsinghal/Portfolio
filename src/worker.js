@@ -1,7 +1,7 @@
 // Cloudflare Worker Entrypoint - Serves Static Assets & Handles /api/send-email
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     const url = new URL(request.url);
 
     // 1. API Route: /api/send-email
@@ -42,9 +42,14 @@ export default {
           );
         }
 
-        const apiKey =
-          env?.RESEND_API_KEY ||
-          (typeof process !== 'undefined' ? process.env?.RESEND_API_KEY : null);
+        const nodeProcess = typeof globalThis !== 'undefined' ? globalThis.process : undefined;
+        const apiKey = env?.RESEND_API_KEY || nodeProcess?.env?.RESEND_API_KEY || null;
+        const recipientEmail =
+          env?.CONTACT_EMAIL ||
+          env?.PORTFOLIO_CONTACT_EMAIL ||
+          env?.MAIL_TO ||
+          nodeProcess?.env?.CONTACT_EMAIL ||
+          '';
 
         if (!apiKey) {
           console.error('RESEND_API_KEY is not configured in Cloudflare environment.');
@@ -52,6 +57,16 @@ export default {
             JSON.stringify({
               success: false,
               error: 'Server configuration error: RESEND_API_KEY is not set on Cloudflare.',
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+
+        if (!recipientEmail) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'No contact recipient is configured. Set CONTACT_EMAIL in the environment.',
             }),
             { status: 500, headers: { 'Content-Type': 'application/json' } }
           );
@@ -105,7 +120,7 @@ export default {
               <div class="field-label">Message Payload</div>
               <div class="message-box">${safeMessage}</div>
               <div class="footer">
-                Dispatched from Ayush Chaurasiya Portfolio Beacon • ${new Date().toUTCString()}
+                Dispatched from Ujjawal Singhal Portfolio Beacon • ${new Date().toUTCString()}
               </div>
             </div>
           </body>
@@ -114,7 +129,7 @@ export default {
 
         const emailPayload = {
           from: 'Portfolio Contact <onboarding@resend.dev>',
-          to: ['ayushchaurasiya2907@gmail.com'],
+          to: [recipientEmail.trim()],
           subject: `[Portfolio Inquiry] ${senderName.trim()}`,
           html: emailHtml,
           text: `Name: ${senderName}\nEmail: ${cleanEmail || 'Not provided'}\n\nMessage:\n${senderMessage}`,
@@ -186,14 +201,13 @@ export default {
 
       try {
         const ghHeaders = {
-          'User-Agent': 'Ayush-Portfolio-Cloudflare-Worker/1.0',
-          Accept: 'application/vnd.github.v3+json',
-        };
+            'User-Agent': 'Ujjawal-Singhal-Portfolio/1.0',
+            Accept: 'application/vnd.github.v3+json',
+          };
 
-        const [userRes, reposRes] = await Promise.all([
-          fetch('https://api.github.com/users/Ayushch-2800', { headers: ghHeaders }),
-          fetch('https://api.github.com/users/Ayushch-2800/repos?sort=pushed&per_page=1', {
-            headers: ghHeaders,
+          const [userRes, reposRes] = await Promise.all([
+            fetch('https://api.github.com/users/ujjawalsinghal', { headers: ghHeaders }),
+            fetch('https://api.github.com/users/ujjawalsinghal/repos?sort=pushed&per_page=1', {
           }),
         ]);
 

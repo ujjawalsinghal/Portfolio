@@ -32,7 +32,6 @@ export default function Navbar({ isHeroPage }) {
   const location = useLocation();
   const ticking = useRef(false);
 
-  // Close mobile drawer on route change (render-time adjustment per React 19 standards)
   const [prevPath, setPrevPath] = useState(location.pathname);
   if (prevPath !== location.pathname) {
     setPrevPath(location.pathname);
@@ -41,7 +40,6 @@ export default function Navbar({ isHeroPage }) {
     }
   }
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       const prevOverflow = document.body.style.overflow;
@@ -52,7 +50,6 @@ export default function Navbar({ isHeroPage }) {
     }
   }, [mobileMenuOpen]);
 
-  // Close on Escape key press
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const handleKeyDown = (e) => {
@@ -63,7 +60,6 @@ export default function Navbar({ isHeroPage }) {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    // If not on hero page, keep it always visible without attaching scroll listener.
     if (!isHeroPage) {
       return;
     }
@@ -91,22 +87,6 @@ export default function Navbar({ isHeroPage }) {
     };
   }, [isHeroPage]);
 
-  const onResumeClick = (e) => {
-    e.preventDefault();
-    const href = '/Ayush_Resume.pdf';
-    try {
-      const a = document.createElement('a');
-      a.href = href;
-      a.download = 'Ayush_Chaurasiya_Resume.pdf';
-      a.target = '_self';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch {
-      window.open(href, '_blank', 'noopener,noreferrer');
-    }
-  };
-
   const navRoutes = [
     { path: '/', label: 'Home', number: '01' },
     { path: '/about', label: 'About', number: '02' },
@@ -117,7 +97,6 @@ export default function Navbar({ isHeroPage }) {
 
   return (
     <>
-      {/* 1. Top-Left Logo (Only visible on Hero page) */}
       <div
         className={`hero-logo ${!isHeroPage ? 'fade-out' : 'fade-in'}`}
         style={{
@@ -135,60 +114,20 @@ export default function Navbar({ isHeroPage }) {
           onClick={playClickSound}
           style={{ textDecoration: 'none', color: '#fff', fontSize: '1.5rem', fontWeight: 900, letterSpacing: '0.1em' }}
         >
-          <ConvexText text="AYUSH" />
+          <ConvexText text="UJJAWAL" />
         </Link>
       </div>
 
-      {/* 1.5 Top-Right Resume (Only visible on Hero page) */}
-      <div
-        className={`hero-logo ${!isHeroPage ? 'fade-out' : 'fade-in'}`}
-        style={{
-          position: 'fixed',
-          top: '2rem',
-          right: '2rem',
-          zIndex: 1000,
-          pointerEvents: isHeroPage ? 'auto' : 'none'
-        }}
-      >
-        <a
-          href="/Ayush_Resume.pdf"
-          onClick={(e) => { onResumeClick(e); playClickSound(); }}
-          onMouseEnter={playHoverSound}
-          className="nav-link hoverable font-mono uppercase text-glow"
-          aria-label="Download Resume"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            textDecoration: 'none',
-            color: '#fff',
-            fontSize: '1.35rem',
-            fontWeight: 800,
-            letterSpacing: '0.08em'
-          }}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 3v10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-            <path d="M8 11l4 4 4-4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M4 20h16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-          <ConvexText text="Resume" />
-        </a>
-      </div>
-
-      {/* 2. Glass Dock Navigation (Visible everywhere) */}
       <nav className={`dock-mode ${isHeroPage && isScrolled ? 'nav-hidden' : 'nav-visible'}`}>
         <div className="container nav-inner">
-          {/* Mobile brand badge inside dock */}
           <Link
             to="/"
             className="mobile-brand-link font-mono uppercase text-glow"
             onClick={() => { playClickSound(); setMobileMenuOpen(false); }}
           >
-            Ayush
+            Ujjawal
           </Link>
 
-          {/* Desktop Navigation Links */}
           <div className="nav-links font-mono uppercase">
             {!isHeroPage && (
               <NavLink to="/" className="nav-link hoverable text-glow" onMouseEnter={playHoverSound} onClick={playClickSound}>Home</NavLink>
@@ -200,7 +139,6 @@ export default function Navbar({ isHeroPage }) {
           </div>
 
           <div className="nav-actions">
-            {/* Audio Toggle */}
             <button
               onClick={() => { toggleMute(); playClickSound(); }}
               onMouseEnter={playHoverSound}
@@ -214,25 +152,6 @@ export default function Navbar({ isHeroPage }) {
               )}
             </button>
 
-            {/* Desktop Resume link */}
-            {!isHeroPage && (
-              <a
-                href="/Ayush_Resume.pdf"
-                onClick={(e) => { onResumeClick(e); playClickSound(); }}
-                onMouseEnter={playHoverSound}
-                className="nav-link hoverable font-mono uppercase text-glow desktop-resume-link"
-                aria-label="Download Resume"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M12 3v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M8 11l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M4 20h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                <ConvexText text="Resume" />
-              </a>
-            )}
-
-            {/* Mobile Hamburger Menu Toggle Button */}
             <button
               type="button"
               className="mobile-menu-toggle hoverable"
@@ -250,7 +169,6 @@ export default function Navbar({ isHeroPage }) {
         </div>
       </nav>
 
-      {/* 3. Luxury Full-Screen Mobile Navigation Drawer */}
       <div
         className={`mobile-nav-drawer ${mobileMenuOpen ? 'open' : ''}`}
         role="dialog"
@@ -291,25 +209,8 @@ export default function Navbar({ isHeroPage }) {
         </div>
 
         <div className="mobile-drawer-footer font-mono">
-          <a
-            href="/Ayush_Resume.pdf"
-            onClick={(e) => {
-              onResumeClick(e);
-              playClickSound();
-              setMobileMenuOpen(false);
-            }}
-            className="mobile-resume-btn hoverable uppercase"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3v10" />
-              <path d="M8 11l4 4 4-4" />
-              <path d="M4 20h16" />
-            </svg>
-            Download Resume (PDF)
-          </a>
-
           <div className="mobile-footer-meta text-gray">
-            <span>FULL STACK DEVELOPER & AIML</span>
+            <span>AI/ML + SOFTWARE DEVELOPMENT</span>
             <span>ABES ENGINEERING COLLEGE</span>
           </div>
         </div>

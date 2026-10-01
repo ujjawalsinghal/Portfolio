@@ -7,9 +7,7 @@ export default function CustomCursor() {
   const [isHovered, setIsHovered] = useState(false);
   const starsRef = useRef([]);
   const lastStarTime = useRef(0);
-  const frameRef = useRef(null);
   const mousePos = useRef({ x: -200, y: -200 });
-  const ringPos = useRef({ x: -200, y: -200 });
 
   useEffect(() => {
     const core = coreRef.current;
@@ -152,7 +150,6 @@ export default function CustomCursor() {
       window.removeEventListener('mousedown', handleMouseDown);
       document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
       document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
       // Clean up any remaining star particles
       starsRef.current.forEach(s => s.remove());
       starsRef.current = [];

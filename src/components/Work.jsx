@@ -3,10 +3,6 @@ import { useMemo, useState } from 'react';
 import ProjectModal from './ProjectModal';
 import MaskedTitle from './MaskedTitle';
 
-import defensysImg from '../assets/defensys_preview.jpg';
-import nutroheistImg from '../assets/nutroheist_preview.jpg';
-import vidyapulseImg from '../assets/vidyapulse_preview.jpg';
-
 export default function Work() {
   const [activeProjectIndex, setActiveProjectIndex] = useState(null);
 
@@ -14,136 +10,132 @@ export default function Work() {
     () => [
       {
         bgClass: 'bg-3',
-        bgImage: defensysImg,
-        shortTitle: 'Defensys',
-        category: 'PYTHON • AI SECURITY • FULL STACK',
-        tagline: 'AI-Powered Cybersecurity Defense System',
+        bgImage: null,
+        shortTitle: 'Movie Recommendation System',
+        category: 'AI • DATA • RECOMMENDER SYSTEM',
+        tagline: 'Movie recommendation prototype using content-based filtering',
         description:
-          'Defensys is an intelligent cybersecurity platform built with Python that leverages AI to detect and respond to security threats in real-time. The system analyzes network behavior, identifies anomalies, and provides actionable defense insights — combining full-stack architecture with smart threat intelligence.',
+          'A content-based movie recommendation project built with Python and the TMDB 5000 Movies and Credits datasets.',
         problem:
-          'Modern organizations struggle with identifying and responding to evolving cybersecurity threats in real-time. Manual monitoring is error-prone, slow, and unable to scale against sophisticated attack vectors.',
+          'Browsing a large movie catalog can make it difficult to quickly identify relevant titles without a structured recommendation approach.',
         solution:
-          'Built Defensys as an AI-driven defense platform using Python to automate threat detection, behavioral analysis, and response workflows. The system provides an intelligent security layer that reduces response time and human effort significantly.',
-        techStack: [
-          'Python',
-          'AI/ML',
-          'Cybersecurity',
-          'REST APIs',
-          'Data Analysis',
-          'Backend Architecture'
-        ],
+          'The project explores content-based recommendation logic using movie metadata and credits data to surface related works from shared characteristics.',
+        techStack: ['Python', 'pandas', 'scikit-learn', 'Streamlit', 'TMDB 5000 Movies', 'TMDB 5000 Credits'],
         features: [
-          'Real-time threat detection',
-          'AI-powered anomaly analysis',
-          'Automated defense workflows',
-          'Security insights dashboard'
+          'Content-based movie recommendation workflow',
+          'TMDB dataset exploration',
+          'Similarity-based movie suggestions',
+          'Streamlit-based project interface'
         ],
         architectureFlow: [
-          { step: '01', title: 'Data Ingestion', tech: 'Python • System APIs', desc: 'Continuous network and system event data collection' },
-          { step: '02', title: 'AI Analysis Engine', tech: 'ML Models • Python', desc: 'Behavioral anomaly detection and threat classification' },
-          { step: '03', title: 'Defense Orchestrator', tech: 'Python Backend', desc: 'Automated response protocols and alert generation' },
-          { step: '04', title: 'Insights Dashboard', tech: 'Full Stack UI', desc: 'Real-time security metrics and visualization' },
+          { step: '01', title: 'Data Loading', tech: 'TMDB Datasets', desc: 'Load movie and credits data for analysis.' },
+          { step: '02', title: 'Feature Preparation', tech: 'Metadata & Credits', desc: 'Process the relevant movie attributes used for similarity comparisons.' },
+          { step: '03', title: 'Recommendation Logic', tech: 'Content-Based Filtering', desc: 'Generate related movie suggestions using shared feature patterns.' },
+          { step: '04', title: 'Display Layer', tech: 'Streamlit', desc: 'Present the recommendations in a simple project interface.' },
         ],
         architectureDetails: [
-          { title: 'AI-Driven Threat Detection', desc: 'Machine learning models analyze patterns in system and network data to detect security anomalies that rule-based systems miss.' },
-          { title: 'Automated Defense Response', desc: 'Once a threat is detected, the system automatically triggers pre-configured defense workflows to minimize damage.' },
-          { title: 'Comprehensive Security Coverage', desc: 'Monitors multiple attack vectors simultaneously, providing holistic protection across the entire system surface.' },
+          { title: 'Content-Based Discovery', desc: 'Uses movie metadata and credits to compare similarities between titles and suggest related options.' },
+          { title: 'Dataset-Focused Workflow', desc: 'Builds the recommendation process around the TMDB 5000 Movies and Credits datasets.' },
+          { title: 'Project-Driven Implementation', desc: 'Keeps the flow transparent and grounded in the known dataset and tooling used for the project.' },
         ],
         metrics: [
-          { label: 'Language', value: 'Python' },
-          { label: 'Type', value: 'AI Security' },
-          { label: 'Detection', value: 'Real-Time' },
-          { label: 'Architecture', value: 'Full Stack' },
+          { label: 'Type', value: 'AI/ML' },
+          { label: 'Domain', value: 'Movies' },
+          { label: 'Focus', value: 'Recommendation' },
+          { label: 'Stack', value: 'Python' },
         ],
-        title: 'Defensys',
-        images: [defensysImg],
-        githubUrl: 'https://github.com/Ayushch-2800/Defensys',
-        liveDemoUrl: 'https://github.com/Ayushch-2800/Defensys',
-        exploreUrl: 'https://github.com/Ayushch-2800/Defensys'
+        title: 'Movie Recommendation System',
+        images: [],
+        githubUrl: 'https://github.com/ujjawalsinghal/Movie-Recommendation-System',
+        liveDemoUrl: null,
+        exploreUrl: null
       },
       {
         bgClass: 'bg-1',
-        bgImage: nutroheistImg,
-        shortTitle: 'NutroHeist',
-        category: 'WEB APP • AI SCANNER • HEALTH TECH',
-        tagline: 'AI-Powered Food Ingredient Safety Scanner',
+        bgImage: null,
+        shortTitle: 'CipherCraft+',
+        category: 'SECURITY • CRYPTOGRAPHY • SOFTWARE',
+        tagline: 'Cipher and encryption toolkit',
         description:
-          'NutroHeist is a smart landing page and web application that scans the ingredients of packaged food products and instantly tells you whether it\'s safe to eat. Upload or enter ingredient labels and get an AI-driven safety analysis with health insights and recommendations.',
+          'A cipher-focused project exploring classic and modern encryption methods in a browser-based interface.',
         problem:
-          'Most people cannot decode the complex chemical names and additives listed on packaged food labels. Harmful ingredients go unnoticed, impacting long-term health without consumers being aware.',
+          'Different types of ciphers and encryption methods are easier to understand when they are demonstrated in a clear, interactive workflow.',
         solution:
-          'Built NutroHeist as an intuitive web application where users can scan or input food ingredient lists and instantly receive safety scores, flagged ingredients, and health impact summaries powered by AI.',
-        techStack: ['HTML5', 'CSS3', 'JavaScript', 'AI Integration', 'Ingredient Analysis'],
+          'CipherCraft+ presents multiple cipher techniques and hashing concepts in a practical front-end project for exploration and comparison.',
+        techStack: ['HTML', 'CSS', 'JavaScript', 'Atbash Cipher', 'ROT13', 'Affine Cipher', "Bacon's Cipher", 'AES', 'RSA', 'Hashing'],
         features: [
-          'Ingredient scanning & analysis',
-          'Safety score generation',
-          'Harmful ingredient detection',
-          'Clean, responsive landing page'
+          'Atbash Cipher',
+          'ROT13',
+          'Affine Cipher',
+          "Bacon's Cipher",
+          'AES',
+          'RSA',
+          'Hashing'
         ],
         architectureFlow: [
-          { step: '01', title: 'Input Interface', tech: 'HTML • CSS • JS', desc: 'Clean landing page with ingredient input or scan form' },
-          { step: '02', title: 'Analysis Engine', tech: 'AI Integration', desc: 'Parses and cross-references ingredients against safety databases' },
-          { step: '03', title: 'Safety Scoring', tech: 'Logic Layer', desc: 'Computes health safety score and flags harmful compounds' },
-          { step: '04', title: 'Results Display', tech: 'Responsive UI', desc: 'Visual safety report with explanations and recommendations' },
+          { step: '01', title: 'Input Handling', tech: 'UI Layer', desc: 'Collect the plaintext or message to transform.' },
+          { step: '02', title: 'Cipher Selection', tech: 'JavaScript Logic', desc: 'Choose the specific cipher or encryption method to apply.' },
+          { step: '03', title: 'Transformation', tech: 'Encryption Logic', desc: 'Process the message according to the selected cipher rules.' },
+          { step: '04', title: 'Output View', tech: 'Browser Interface', desc: 'Display the transformed result in the UI.' },
         ],
         architectureDetails: [
-          { title: 'Smart Ingredient Parsing', desc: 'Intelligently breaks down complex ingredient lists, identifying chemical names and additives that pose health risks.' },
-          { title: 'Safety Database Cross-Reference', desc: 'Maps each ingredient against a comprehensive database of flagged, banned, or harmful food additives.' },
-          { title: 'User-Friendly Results', desc: 'Presents complex safety information in a simple, color-coded format that anyone can instantly understand.' },
+          { title: 'Cipher Exploration', desc: 'Includes a range of cipher techniques and hashing concepts for practical experimentation.' },
+          { title: 'Front-End Focus', desc: 'Built with HTML, CSS, and JavaScript to provide a direct browser-based experience.' },
+          { title: 'Learning-Focused Design', desc: 'Keeps the project readable and approachable while covering multiple encryption approaches.' },
         ],
         metrics: [
-          { label: 'Language', value: 'CSS / HTML / JS' },
-          { label: 'Type', value: 'Health Tech' },
-          { label: 'Analysis', value: 'AI-Powered' },
-          { label: 'Interface', value: 'Responsive' },
+          { label: 'Type', value: 'Security' },
+          { label: 'Domain', value: 'Cryptography' },
+          { label: 'Focus', value: 'Cipher Tools' },
+          { label: 'Stack', value: 'HTML / CSS / JS' },
         ],
-        title: 'NutroHeist',
-        images: [nutroheistImg],
-        githubUrl: 'https://github.com/Ayushch-2800/NutroHeist',
-        liveDemoUrl: 'https://github.com/Ayushch-2800/NutroHeist',
-        exploreUrl: 'https://github.com/Ayushch-2800/NutroHeist'
+        title: 'CipherCraft+',
+        images: [],
+        githubUrl: null,
+        liveDemoUrl: null,
+        exploreUrl: null
       },
       {
         bgClass: 'bg-2',
-        bgImage: vidyapulseImg,
-        shortTitle: 'VidyaPulse AI',
-        category: 'AI EDUCATION • FULL STACK • GENERATIVE AI',
-        tagline: 'AI-Powered Intelligent Education Platform',
+        bgImage: null,
+        shortTitle: 'Bank Default Risk Predictor',
+        category: 'ML • FINANCE • RISK ANALYSIS',
+        tagline: 'Machine learning project for exploring default risk prediction',
         description:
-          'VidyaPulse AI is an intelligent education platform designed to transform the way students learn. Powered by generative AI, it creates personalized learning experiences, generates quizzes, explains complex topics, and tracks student progress — making quality education accessible and adaptive.',
+          'A machine learning project for exploring bank default risk prediction using structured financial data and a data-driven workflow.',
         problem:
-          'Traditional education systems follow a one-size-fits-all approach, leaving students behind when they need personalized support. There is no scalable way to provide individualized tutoring to every student.',
+          'Assessing default risk from financial data requires thoughtful analysis of patterns and indicators before drawing conclusions.',
         solution:
-          'Built VidyaPulse AI as a generative AI-powered education platform that adapts to each student\'s learning pace, generates dynamic content, and provides instant, intelligent explanations across all subjects.',
-        techStack: ['React', 'Node.js', 'Generative AI', 'Full Stack', 'Education Tech'],
+          'The project explores a risk-driven modeling workflow for evaluating default-risk signals in a data-focused machine learning context.',
+        techStack: ['Python', 'Machine Learning', 'Risk Modeling', 'Data Analysis'],
         features: [
-          'AI-generated personalized content',
-          'Interactive quiz generation',
-          'Smart concept explanations',
-          'Student progress tracking'
+          'Risk-pattern exploration',
+          'Structured financial data workflow',
+          'Machine learning-based analysis',
+          'Default-risk prediction project structure'
         ],
         architectureFlow: [
-          { step: '01', title: 'Student Portal', tech: 'React Frontend', desc: 'Intuitive learning interface with personalized dashboards' },
-          { step: '02', title: 'AI Content Engine', tech: 'Generative AI', desc: 'Dynamic quiz, explanation, and content generation' },
-          { step: '03', title: 'Learning API', tech: 'Node.js Backend', desc: 'Content serving, progress tracking, and analytics' },
-          { step: '04', title: 'Progress Analytics', tech: 'Data Layer', desc: 'Student performance insights and adaptive recommendations' },
+          { step: '01', title: 'Data Review', tech: 'Financial Dataset', desc: 'Inspect relevant structured inputs used for risk analysis.' },
+          { step: '02', title: 'Feature Evaluation', tech: 'Data Processing', desc: 'Assess the signals most relevant to financial default risk.' },
+          { step: '03', title: 'Modeling Step', tech: 'Machine Learning', desc: 'Explore a predictive workflow for risk-oriented classification.' },
+          { step: '04', title: 'Risk Output', tech: 'Decision Support', desc: 'Summarize the project outcome in a clear, analysis-focused way.' },
         ],
         architectureDetails: [
-          { title: 'Personalized AI Learning', desc: 'Generative AI adapts content difficulty and style based on each student\'s performance history and learning patterns.' },
-          { title: 'Dynamic Content Generation', desc: 'Instantly creates fresh quizzes, examples, and explanations rather than relying on static content libraries.' },
-          { title: 'Progress-Driven Adaptation', desc: 'Continuously tracks student progress and adjusts learning pathways to target gaps and reinforce strengths.' },
+          { title: 'Risk-Focused Modeling', desc: 'Uses structured financial information to explore how default-related indicators can be analyzed in a ML workflow.' },
+          { title: 'Applied Data Science', desc: 'Frames the project as a practical example of machine learning in a finance context.' },
+          { title: 'Conservative Scope', desc: 'Keeps the work grounded in the established project goal without claiming production use or verified performance metrics.' },
         ],
         metrics: [
-          { label: 'Type', value: 'Ed-Tech AI' },
-          { label: 'AI Engine', value: 'Generative AI' },
-          { label: 'Stack', value: 'Full Stack' },
-          { label: 'Focus', value: 'Personalization' },
+          { label: 'Type', value: 'ML' },
+          { label: 'Domain', value: 'Finance' },
+          { label: 'Focus', value: 'Risk' },
+          { label: 'Stack', value: 'Python' },
         ],
-        title: 'VidyaPulse AI',
-        images: [vidyapulseImg],
-        githubUrl: 'https://github.com/Ayushch-2800/VidyaPulse-AI',
-        liveDemoUrl: 'https://github.com/Ayushch-2800/VidyaPulse-AI',
-        exploreUrl: 'https://github.com/Ayushch-2800/VidyaPulse-AI'
+        title: 'Bank Default Risk Predictor',
+        images: [],
+        githubUrl: null,
+        liveDemoUrl: null,
+        exploreUrl: null
       }
     ],
     []
@@ -171,13 +163,12 @@ export default function Work() {
             }}
             aria-label={`Open project: ${proj.title}`}
           >
-            {/* Real project image as background */}
             <div
               className="project-bg"
               style={{
-                backgroundImage: `url(${proj.bgImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center top',
+                background: proj.bgImage
+                  ? `url(${proj.bgImage}) center top / cover no-repeat`
+                  : 'linear-gradient(135deg, rgba(15,23,42,0.96), rgba(37,99,235,0.2), rgba(15,23,42,0.9))',
               }}
             />
             <div className="project-overlay" />

@@ -47,9 +47,9 @@ export default function Contact() {
 
   const handleCopyEmail = () => {
     playClickSound();
-    navigator.clipboard.writeText('ayushchaurasiya2907@gmail.com');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2400);
+    setCopied(false);
+    setStatusMsg('Direct contact email is not configured yet.');
+    setTimeout(() => setStatusMsg(''), 2200);
   };
 
   const handleFormSubmit = (e) => {
@@ -395,8 +395,8 @@ export default function Contact() {
           <div className="direct-comms-deck gsap-reveal font-mono">
             <div className="comms-capsule">
               <div className="comms-channel-info">
-                <span className="comms-tag text-gray">My Email:</span>
-                <span className="comms-email">ayushchaurasiya2907@gmail.com</span>
+                <span className="comms-tag text-gray">Contact:</span>
+                <span className="comms-email">Email pending configuration</span>
               </div>
 
               <button
@@ -404,8 +404,9 @@ export default function Contact() {
                 onClick={handleCopyEmail}
                 onMouseEnter={playHoverSound}
                 className="copy-signal-btn hoverable"
+                aria-label="Contact email unavailable"
               >
-                {copied ? '✓ Copied' : 'Copy Email'}
+                {copied ? '✓ Copied' : 'Unavailable'}
               </button>
             </div>
 

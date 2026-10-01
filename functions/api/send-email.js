@@ -41,7 +41,9 @@ export async function onRequestPost(context) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cleanEmail = senderEmail && emailRegex.test(senderEmail.trim()) ? senderEmail.trim() : null;
 
-    const apiKey = env?.RESEND_API_KEY || (typeof process !== 'undefined' ? process.env?.RESEND_API_KEY : null);
+    const nodeProcess = typeof globalThis !== 'undefined' ? globalThis.process : undefined;
+    const apiKey = env?.RESEND_API_KEY || nodeProcess?.env?.RESEND_API_KEY || null;
+    const recipientEmail = env?.CONTACT_EMAIL || env?.PORTFOLIO_CONTACT_EMAIL || env?.MAIL_TO || nodeProcess?.env?.CONTACT_EMAIL || '';
 
     if (!apiKey) {
       console.error('RESEND_API_KEY is not configured in Cloudflare environment.');
@@ -49,6 +51,16 @@ export async function onRequestPost(context) {
         JSON.stringify({
           success: false,
           error: 'Server configuration error: RESEND_API_KEY is not set.',
+        }),
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
+    if (!recipientEmail) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'No contact recipient is configured. Set CONTACT_EMAIL in the environment.',
         }),
         { status: 500, headers: corsHeaders }
       );
@@ -98,7 +110,7 @@ export async function onRequestPost(context) {
           <div class="field-label">Message Payload</div>
           <div class="message-box">${safeMessage}</div>
           <div class="footer">
-            Dispatched from Ayush Chaurasiya Portfolio Beacon • ${new Date().toUTCString()}
+            Dispatched from Ujjawal Singhal Portfolio Beacon • ${new Date().toUTCString()}
           </div>
         </div>
       </body>
@@ -107,7 +119,7 @@ export async function onRequestPost(context) {
 
     const emailPayload = {
       from: 'Portfolio Contact <onboarding@resend.dev>',
-      to: ['ayushchaurasiya2907@gmail.com'],
+      to: [recipientEmail.trim()],
       subject: `[Portfolio Inquiry] ${senderName.trim()}`,
       html: emailHtml,
       text: `Name: ${senderName}\nEmail: ${cleanEmail || 'Not provided'}\n\nMessage:\n${senderMessage}`,

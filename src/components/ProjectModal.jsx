@@ -74,7 +74,7 @@ export default function ProjectModal({ open, onClose, project }) {
   const onPrev = () => setActiveIndex((i) => Math.max(0, i - 1));
   const onNext = () => setActiveIndex((i) => Math.min(images.length - 1, i + 1));
 
-  const activeImage = images[activeIndex];
+  const activeImage = images?.[activeIndex] ?? null;
 
   useEffect(() => {
     if (!open || !galleryRef.current) return;
@@ -173,12 +173,30 @@ export default function ProjectModal({ open, onClose, project }) {
           <div className="project-modal-body" data-lenis-prevent="true">
             <div className="project-modal-gallery">
               <div className="project-modal-gallery-main">
-                <img
-                  ref={galleryRef}
-                  src={activeImage}
-                  alt={`${project.title} screenshot ${activeIndex + 1}`}
-                  className="project-modal-image"
-                />
+                {activeImage ? (
+                  <img
+                    ref={galleryRef}
+                    src={activeImage}
+                    alt={`${project.title} screenshot ${activeIndex + 1}`}
+                    className="project-modal-image"
+                  />
+                ) : (
+                  <div
+                    ref={galleryRef}
+                    className="project-modal-image project-modal-image-placeholder"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, rgba(15,23,42,0.96), rgba(37,99,235,0.2), rgba(15,23,42,0.9))',
+                      color: '#f8fafc',
+                      fontWeight: 800,
+                      letterSpacing: '0.14em',
+                    }}
+                  >
+                    {project.title}
+                  </div>
+                )}
                 {images.length > 1 ? (
                   <>
                     <button

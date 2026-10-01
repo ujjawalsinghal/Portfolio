@@ -1,5 +1,4 @@
 import { useAudio } from '../hooks/useAudio';
-import ayushPhoto from '../assets/AyushPhoto.jpg';
 
 export default function EngineeringTelemetry() {
   const { playHoverSound, playClickSound } = useAudio();
@@ -12,7 +11,7 @@ export default function EngineeringTelemetry() {
           <span className="telemetry-live-dot" />
           <span className="telemetry-hud-tag">Current Activity &amp; Profiles</span>
         </div>
-        <span className="telemetry-hud-status">Active in 2026 • Open for Opportunities</span>
+        <span className="telemetry-hud-status">Active • AI/ML + Software Development</span>
       </div>
 
       {/* 3-Column Profile & Activity Grid */}
@@ -23,13 +22,13 @@ export default function EngineeringTelemetry() {
             <span className="card-badge">CURRENT FOCUS</span>
             <span className="card-indicator">Active</span>
           </div>
-          <h3 className="telemetry-card-title">Full Stack &amp; AI Systems</h3>
+          <h3 className="telemetry-card-title">AI/ML &amp; Software Development</h3>
           <p className="telemetry-card-text text-gray">
-            Building full-stack web applications with React, Node.js, and AI integration. Solving complex algorithmic problems using Java, designing scalable REST APIs, and leveraging AI tools for rapid, efficient development.
+            Working on AI/ML-driven project ideas, modern software development workflows, and practical problem solving with a focus on real-world applications and data-informed design.
           </p>
           <div className="telemetry-meta-row text-gray">
-            <span>CORE STACK:</span>
-            <span className="meta-highlight">React, Node.js, Python, Tailwind CSS, Java</span>
+            <span>PROFILE:</span>
+            <span className="meta-highlight">B.Tech CSE • ABES Engineering College • CGPA 8.92</span>
           </div>
         </div>
 
@@ -37,79 +36,76 @@ export default function EngineeringTelemetry() {
         <div className="telemetry-card hoverable">
           <div className="telemetry-card-top">
             <span className="card-badge">GITHUB CODE</span>
-            <span className="card-indicator">8+ Repositories</span>
+            <span className="card-indicator">Open Source</span>
           </div>
-          <h3 className="telemetry-card-title">Open Source Projects</h3>
+          <h3 className="telemetry-card-title">Project Work</h3>
           <p className="telemetry-card-text text-gray">
-            8+ public repositories featuring AI-powered apps, ML projects, food scanner tools, and full-stack applications — all built from concept to deployment.
+            Portfolio work and project experiments centered around AI/ML, recommendation systems, cybersecurity thinking, and applied software engineering.
           </p>
           <div className="telemetry-actions-list">
             <a
-              href="https://github.com/Ayushch-2800"
+              href="https://github.com/ujjawalsinghal"
               target="_blank"
               rel="noopener noreferrer"
               className="telemetry-btn hoverable"
               onMouseEnter={playHoverSound}
               onClick={playClickSound}
             >
-              <span>View GitHub Repositories</span>
+              <span>View GitHub Profile</span>
               <span className="telemetry-arrow">↗</span>
             </a>
           </div>
         </div>
 
-        {/* Card 3: LinkedIn Profile & Quick Contact */}
+        {/* Card 3: Identity & Availability */}
         <div className="telemetry-card telemetry-card-comms hoverable">
           <div className="telemetry-card-top">
-            <span className="card-badge">PROFESSIONAL PROFILE</span>
-            <span className="card-indicator">Open to Roles</span>
+            <span className="card-badge">PROFILE</span>
+            <span className="card-indicator">Available</span>
           </div>
 
-          {/* Clean LinkedIn Identity Preview */}
           <div className="linkedin-profile-preview">
-            <img
-              src={ayushPhoto}
-              alt="Ayush Chaurasiya"
+            <div
               className="linkedin-preview-avatar"
-            />
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, rgba(148,163,184,0.18), rgba(255,255,255,0.04))',
+                color: '#f8fafc',
+                fontWeight: 800,
+                fontSize: '1.25rem',
+              }}
+              aria-label="Ujjawal Singhal placeholder avatar"
+            >
+              U
+            </div>
             <div className="linkedin-preview-info">
               <div className="linkedin-preview-name">
-                <span>Ayush Chaurasiya</span>
-                <span className="linkedin-check" title="Verified Profile">✓</span>
+                <span>Ujjawal Singhal</span>
+                <span className="linkedin-check" title="Portfolio profile">✓</span>
               </div>
               <div className="linkedin-preview-role text-gray">
-                Full Stack Developer • 3rd-Year CSE (AIML)
+                B.Tech CSE • ABES Engineering College
               </div>
             </div>
           </div>
 
           <p className="telemetry-card-text text-gray" style={{ marginBottom: '1rem' }}>
-            Open for full-stack engineering roles, AI-assisted development, internship opportunities, and collaborative projects.
+            Portfolio contact details are intentionally left configurable until verified personal information is provided.
           </p>
 
           <div className="telemetry-actions-list">
             <a
-              href="https://linkedin.com/in/ayush-chaurasiya-979004308/"
+              href="https://github.com/ujjawalsinghal"
               target="_blank"
               rel="noopener noreferrer"
               className="telemetry-btn hoverable"
               onMouseEnter={playHoverSound}
               onClick={playClickSound}
             >
-              <span>Connect on LinkedIn</span>
+              <span>GitHub</span>
               <span className="telemetry-arrow">↗</span>
-            </a>
-
-            <a
-              href="https://wa.me/918318781001?text=Hi%20Ayush,%20saw%20your%20portfolio%20and%20wanted%20to%20connect!"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="telemetry-btn telemetry-btn-ping hoverable"
-              onMouseEnter={playHoverSound}
-              onClick={playClickSound}
-            >
-              <span>Chat on WhatsApp</span>
-              <span className="telemetry-arrow">💬</span>
             </a>
           </div>
         </div>
