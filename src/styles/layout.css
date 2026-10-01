@@ -126,3 +126,25 @@ section {
   display: inline-block;
   animation: bounce 2s infinite;
 }
+
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 10000;
+  transform: translateY(-180%);
+  padding: 0.7rem 1rem;
+  background: #050505;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.35);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
+}
