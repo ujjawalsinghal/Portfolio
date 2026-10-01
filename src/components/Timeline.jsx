@@ -7,9 +7,11 @@ import {
   EdgeResumeATSParserCanvas
 } from './TimelineVisualizers';
 import MaskedTitle from './MaskedTitle';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 export default function Timeline() {
   const { playHoverSound, playClickSound } = useAudio();
+  const prefersReducedMotion = useReducedMotion();
   const [activeEpochIndex, setActiveEpochIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -89,13 +91,13 @@ export default function Timeline() {
   ];
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || prefersReducedMotion) return;
     const interval = setInterval(() => {
       setActiveEpochIndex((prev) => (prev + 1) % epochs.length);
     }, 4500);
 
     return () => clearInterval(interval);
-  }, [isPaused, epochs.length]);
+  }, [isPaused, prefersReducedMotion, epochs.length]);
 
   const handleNext = useCallback(() => {
     playClickSound();
@@ -135,9 +137,9 @@ export default function Timeline() {
         </div>
         <div className="timeline-header-meta font-mono">
           <div className="timeline-meta-pill">
-            <span className={`meta-pulse-dot ${isPaused ? 'is-paused' : ''}`} />
+            <span className={`meta-pulse-dot ${isPaused || prefersReducedMotion ? 'is-paused' : ''}`} />
             <span className="meta-pill-text">
-              STAGE 0{activeEpochIndex + 1}/04 • {isPaused ? 'INTERACTIVE' : 'AUTO-RUNNING'}
+              STAGE 0{activeEpochIndex + 1}/04 • {prefersReducedMotion ? 'MOTION REDUCED' : isPaused ? 'INTERACTIVE' : 'AUTO-RUNNING'}
             </span>
           </div>
           <div className="timeline-jump-strip">
@@ -227,7 +229,7 @@ export default function Timeline() {
 
                     <div className="timeline-simulation-pane">
                       <div className="terminal-canvas-wrapper">
-                        <Visualizer isActive={isActive} />
+                        <Visualizer isActive={isActive} reducedMotion={prefersReducedMotion} />
                       </div>
                     </div>
                   </div>

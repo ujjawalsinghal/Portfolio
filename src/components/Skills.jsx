@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAudio } from '../hooks/useAudio';
 import MaskedTitle from './MaskedTitle';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 const categories = [
   {
@@ -54,19 +55,63 @@ const categories = [
   }
 ];
 
+function getCardVisualState(index, angle, angleStep) {
+  const cardBaseAngle = index * angleStep;
+  let diffDeg = ((cardBaseAngle - angle) % 360 + 360) % 360;
+  if (diffDeg > 180) diffDeg -= 360;
+
+  const rad = (diffDeg * Math.PI) / 180;
+  const sinVal = Math.sin(rad);
+  const cosVal = Math.cos(rad);
+  const depthFactor = (cosVal + 1) / 2;
+  const scale = 0.64 + depthFactor * 0.41;
+  let blurAmount = 0;
+  let opacity = 1;
+
+  if (depthFactor < 0.5) {
+    const backFactor = (0.5 - depthFactor) / 0.5;
+    blurAmount = backFactor * 4;
+    opacity = 1 - backFactor * 0.65;
+  }
+
+  return {
+    sinVal,
+    cosVal,
+    rotateYDeg: -diffDeg * 0.85,
+    scale,
+    opacity,
+    blur: blurAmount > 0 ? `blur(${blurAmount.toFixed(1)}px)` : 'none',
+    zIndex: Math.round(depthFactor * 100),
+  };
+}
+
+function applyCardVisualState(card, state) {
+  card.style.setProperty('--card-sin', state.sinVal);
+  card.style.setProperty('--card-cos', state.cosVal);
+  card.style.setProperty('--card-rotate-y', `${state.rotateYDeg}deg`);
+  card.style.setProperty('--depth-scale', state.scale);
+  card.style.setProperty('--depth-opacity', state.opacity);
+  card.style.setProperty('--depth-blur', state.blur);
+  card.style.zIndex = state.zIndex;
+}
+
 
 export default function Skills() {
   const { playHoverSound, playClickSound } = useAudio();
+  const prefersReducedMotion = useReducedMotion();
   const carouselStageRef = useRef(null);
+  const cardRefs = useRef([]);
 
-  // Rotation angle in degrees (continuous auto-running motion)
-  const [rotationAngle, setRotationAngle] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
   const angleRef = useRef(0);
   const isPausedRef = useRef(false);
   const isDraggingRef = useRef(false);
+  const isVisibleRef = useRef(false);
+  const animationFrameRef = useRef(null);
+  const animationControlRef = useRef(() => {});
+  const updateCarouselRef = useRef(null);
   const startXRef = useRef(0);
   const startAngleRef = useRef(0);
   const lastActiveIndexRef = useRef(0);
@@ -74,63 +119,118 @@ export default function Skills() {
   const totalCards = categories.length;
   const angleStep = 360 / totalCards; // 60 degrees between each card
 
-  // Keep refs in sync
+  const updateCarousel = useCallback((angle) => {
+    angleRef.current = angle;
+    cardRefs.current.forEach((card, index) => {
+      if (card) applyCardVisualState(card, getCardVisualState(index, angle, angleStep));
+    });
+
+    let closestIdx = 0;
+    let minDiff = 360;
+    for (let index = 0; index < totalCards; index++) {
+      let diff = ((index * angleStep - angle) % 360 + 360) % 360;
+      if (diff > 180) diff = 360 - diff;
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIdx = index;
+      }
+    }
+
+    if (closestIdx !== lastActiveIndexRef.current) {
+      lastActiveIndexRef.current = closestIdx;
+      setActiveCardIndex(closestIdx);
+    }
+  }, [angleStep, totalCards]);
+
+  useEffect(() => {
+    updateCarouselRef.current = updateCarousel;
+  }, [updateCarousel]);
+
+  // Keep the pause ref in sync and stop/resume the loop accordingly.
   useEffect(() => {
     isPausedRef.current = isPaused;
+    animationControlRef.current();
   }, [isPaused]);
 
-  // Continuous auto-run animation loop
+  // Continuous rotation only runs while the stage is visible and motion is allowed.
   useEffect(() => {
-    let animId;
-    let lastTime = performance.now();
+    let lastTime = 0;
 
-    const loop = (currentTime) => {
-      const delta = (currentTime - lastTime) / 1000;
-      lastTime = currentTime;
+    const canAnimate = () =>
+      isVisibleRef.current &&
+      !isPausedRef.current &&
+      !isDraggingRef.current &&
+      !prefersReducedMotion;
 
-      if (!isPausedRef.current && !isDraggingRef.current) {
-        // Continuous running speed: ~20 degrees per second (smooth, lively ~18s full ring cycle)
-        angleRef.current = (angleRef.current + delta * 20) % 360;
-        setRotationAngle(angleRef.current);
+    const stop = () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
-
-      // Calculate which card is closest to the front (cos(angle) is maximized at 0 / 360)
-      let closestIdx = 0;
-      let minDiff = 360;
-
-      for (let i = 0; i < totalCards; i++) {
-        let diff = ((i * angleStep - angleRef.current) % 360 + 360) % 360;
-        if (diff > 180) diff = 360 - diff;
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = i;
-        }
-      }
-
-      if (closestIdx !== lastActiveIndexRef.current) {
-        lastActiveIndexRef.current = closestIdx;
-        setActiveCardIndex(closestIdx);
-      }
-
-      animId = requestAnimationFrame(loop);
     };
 
-    animId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animId);
-  }, [angleStep, totalCards]);
+    const loop = (currentTime) => {
+      animationFrameRef.current = null;
+      if (!canAnimate()) return;
+
+      const delta = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+      updateCarouselRef.current?.((angleRef.current + delta * 20) % 360);
+      if (canAnimate()) animationFrameRef.current = requestAnimationFrame(loop);
+    };
+
+    const start = () => {
+      if (!canAnimate() || animationFrameRef.current !== null) return;
+      lastTime = performance.now();
+      animationFrameRef.current = requestAnimationFrame(loop);
+    };
+
+    animationControlRef.current = () => {
+      if (canAnimate()) start();
+      else stop();
+    };
+    animationControlRef.current();
+
+    return () => {
+      stop();
+      animationControlRef.current = () => {};
+    };
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    const stage = carouselStageRef.current;
+    if (!stage) return;
+
+    if (!('IntersectionObserver' in window)) {
+      isVisibleRef.current = true;
+      animationControlRef.current();
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisibleRef.current = entry.isIntersecting && entry.intersectionRatio >= 0.1;
+      animationControlRef.current();
+    }, { threshold: [0, 0.1] });
+
+    observer.observe(stage);
+    return () => {
+      observer.disconnect();
+      isVisibleRef.current = false;
+      animationControlRef.current();
+    };
+  }, []);
 
   // Rotate to specific card on click or nav button
   const rotateToCard = useCallback((index) => {
     playClickSound();
     const target = index * angleStep;
-    angleRef.current = target;
-    setRotationAngle(target);
-    setActiveCardIndex(index);
+    updateCarouselRef.current?.(target);
   }, [angleStep, playClickSound]);
 
   // Interactive Drag / Swipe controls
   const handlePointerDown = (e) => {
     isDraggingRef.current = true;
+    animationControlRef.current();
     startXRef.current = e.clientX || (e.touches && e.touches[0]?.clientX) || 0;
     startAngleRef.current = angleRef.current;
   };
@@ -139,12 +239,12 @@ export default function Skills() {
     if (!isDraggingRef.current) return;
     const clientX = e.clientX || (e.touches && e.touches[0]?.clientX) || 0;
     const deltaX = clientX - startXRef.current;
-    angleRef.current = (startAngleRef.current - deltaX * 0.32 + 3600) % 360;
-    setRotationAngle(angleRef.current);
+    updateCarouselRef.current?.((startAngleRef.current - deltaX * 0.32 + 3600) % 360);
   };
 
   const handlePointerUp = () => {
     isDraggingRef.current = false;
+    animationControlRef.current();
   };
 
   // Wheel interaction: scroll wheel rotates the 360 cylinder
@@ -152,8 +252,7 @@ export default function Skills() {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
       e.preventDefault();
       const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-      angleRef.current = (angleRef.current + delta * 0.2 + 3600) % 360;
-      setRotationAngle(angleRef.current);
+      updateCarouselRef.current?.((angleRef.current + delta * 0.2 + 3600) % 360);
     }
   };
 
@@ -183,54 +282,22 @@ export default function Skills() {
 
         <div className="skills-cylinder-stage">
           {categories.map((cat, index) => {
-            // Angle in degrees relative to front
-            const cardBaseAngle = index * angleStep;
-            // Signed angle offset relative to 0 (-180 to +180)
-            let diffDeg = ((cardBaseAngle - rotationAngle) % 360 + 360) % 360;
-            if (diffDeg > 180) diffDeg -= 360;
-
-            const rad = (diffDeg * Math.PI) / 180;
-            const sinVal = Math.sin(rad);
-            const cosVal = Math.cos(rad);
-
-            // Normalized depth: 1.0 = absolute front, 0.0 = absolute back
-            const depthFactor = (cosVal + 1) / 2;
-
-            // Scale: Front is large (1.05x), shrinking smoothly towards sides & back (0.64x)
-            const scale = 0.64 + depthFactor * 0.41;
-
-            // Clarity & Depth Sorting:
-            // Front cards (depthFactor >= 0.5) are 100% crystal clear with zero blur and full opacity
-            // Back cards (depthFactor < 0.5) smoothly blur and dim into the background
-            let blurAmount = 0;
-            let opacity = 1;
-            if (depthFactor < 0.5) {
-              const backFactor = (0.5 - depthFactor) / 0.5; // 0.0 (sides) to 1.0 (deep back)
-              blurAmount = backFactor * 4; // 0px to 4px blur only behind the ring
-              opacity = 1 - backFactor * 0.65; // 1.0 down to 0.35 at deep back
-            }
-
-            // Z-Index: strictly sorted by depth
-            const zIndex = Math.round(depthFactor * 100);
-
-            // True curved 3D ring bend:
-            // Tangent rotation along cylinder perimeter
-            const rotateYDeg = -diffDeg * 0.85;
-
+            const visualState = getCardVisualState(index, 0, angleStep);
             const isFrontActive = index === activeCardIndex;
 
             return (
               <div
                 key={cat.id}
                 className={`skill-orbital-card hoverable ${isFrontActive ? 'active-front' : ''}`}
+                ref={(node) => { cardRefs.current[index] = node; }}
                 style={{
-                  '--card-sin': sinVal,
-                  '--card-cos': cosVal,
-                  '--card-rotate-y': `${rotateYDeg}deg`,
-                  '--depth-scale': scale,
-                  '--depth-opacity': opacity,
-                  '--depth-blur': blurAmount > 0 ? `blur(${blurAmount.toFixed(1)}px)` : 'none',
-                  zIndex
+                  '--card-sin': visualState.sinVal,
+                  '--card-cos': visualState.cosVal,
+                  '--card-rotate-y': `${visualState.rotateYDeg}deg`,
+                  '--depth-scale': visualState.scale,
+                  '--depth-opacity': visualState.opacity,
+                  '--depth-blur': visualState.blur,
+                  zIndex: visualState.zIndex
                 }}
                 onClick={() => rotateToCard(index)}
                 onMouseEnter={() => {

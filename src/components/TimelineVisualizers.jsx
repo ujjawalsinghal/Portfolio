@@ -1,23 +1,80 @@
 import { useEffect, useRef } from 'react';
 
+function createCanvasLoop(draw, animate) {
+  let frameId = null;
+  let active = false;
+  let reducedMotion = false;
+  let disposed = false;
+
+  const stop = () => {
+    if (frameId !== null) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+  };
+
+  const schedule = () => {
+    if (frameId === null && active && animate && !reducedMotion && !document.hidden && !disposed) {
+      frameId = requestAnimationFrame(tick);
+    }
+  };
+
+  const tick = () => {
+    frameId = null;
+    if (!active || reducedMotion || document.hidden || disposed) return;
+    draw();
+    schedule();
+  };
+
+  const drawOnce = () => {
+    if (active && !document.hidden && !disposed) draw();
+    schedule();
+  };
+
+  const handleVisibilityChange = () => {
+    stop();
+    drawOnce();
+  };
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  return {
+    setState(nextActive, nextReducedMotion) {
+      active = nextActive;
+      reducedMotion = nextReducedMotion;
+      stop();
+      drawOnce();
+    },
+    redraw: drawOnce,
+    dispose() {
+      disposed = true;
+      active = false;
+      stop();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    },
+  };
+}
+
 // ============================================================================
 // STAGE 01: Dec 2025 – Mar 2026 Web Foundations & Core Logic
 // Clean DOM Tree Hierarchy, CSS Cascade Rule Inspector & Event Dispatcher
 // ============================================================================
-export function WebArchitectureCanvas({ isActive = true }) {
+export function WebArchitectureCanvas({ isActive = true, reducedMotion = false }) {
   const canvasRef = useRef(null);
+  const loopRef = useRef(null);
   const isActiveRef = useRef(isActive);
+  const reducedMotionRef = useRef(reducedMotion);
 
   useEffect(() => {
     isActiveRef.current = isActive;
-  }, [isActive]);
+    reducedMotionRef.current = reducedMotion;
+    loopRef.current?.setState(isActive, reducedMotion);
+  }, [isActive, reducedMotion]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let animId;
-
     const parent = canvas.parentElement;
     let width = parent?.clientWidth || 380;
     let height = parent?.clientHeight || 280;
@@ -32,6 +89,7 @@ export function WebArchitectureCanvas({ isActive = true }) {
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      loopRef.current?.redraw();
     };
     resize();
 
@@ -58,8 +116,6 @@ export function WebArchitectureCanvas({ isActive = true }) {
     let frame = 0;
 
     const render = () => {
-      animId = requestAnimationFrame(render);
-
       frame++;
       ctx.clearRect(0, 0, width, height);
 
@@ -122,10 +178,12 @@ export function WebArchitectureCanvas({ isActive = true }) {
       ctx.fillText('DOM_READY • FULL_HIERARCHY', width - 16, footerY);
     };
 
-    render();
+    loopRef.current = createCanvasLoop(render, true);
+    loopRef.current.setState(isActiveRef.current, reducedMotionRef.current);
 
     return () => {
-      cancelAnimationFrame(animId);
+      loopRef.current?.dispose();
+      loopRef.current = null;
       ro.disconnect();
     };
   }, []);
@@ -137,20 +195,22 @@ export function WebArchitectureCanvas({ isActive = true }) {
 // STAGE 02: June 2026 (5-Day Sprint)
 // ChatUp Full-Duplex WebSocket Message Stream & MongoDB Persistence
 // ============================================================================
-export function ChatUpSocketStreamCanvas({ isActive = true }) {
+export function ChatUpSocketStreamCanvas({ isActive = true, reducedMotion = false }) {
   const canvasRef = useRef(null);
+  const loopRef = useRef(null);
   const isActiveRef = useRef(isActive);
+  const reducedMotionRef = useRef(reducedMotion);
 
   useEffect(() => {
     isActiveRef.current = isActive;
-  }, [isActive]);
+    reducedMotionRef.current = reducedMotion;
+    loopRef.current?.setState(isActive, reducedMotion);
+  }, [isActive, reducedMotion]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let animId;
-
     const parent = canvas.parentElement;
     let width = parent?.clientWidth || 380;
     let height = parent?.clientHeight || 280;
@@ -165,6 +225,7 @@ export function ChatUpSocketStreamCanvas({ isActive = true }) {
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      loopRef.current?.redraw();
     };
     resize();
 
@@ -179,8 +240,6 @@ export function ChatUpSocketStreamCanvas({ isActive = true }) {
     ];
 
     const render = () => {
-      animId = requestAnimationFrame(render);
-
       ctx.clearRect(0, 0, width, height);
 
       // 1. Clean Channel Header Bar
@@ -250,10 +309,12 @@ export function ChatUpSocketStreamCanvas({ isActive = true }) {
       ctx.fillText('SUB-25MS LATENCY VERIFIED', width - 16, pipeY + 14);
     };
 
-    render();
+    loopRef.current = createCanvasLoop(render, false);
+    loopRef.current.setState(isActiveRef.current, reducedMotionRef.current);
 
     return () => {
-      cancelAnimationFrame(animId);
+      loopRef.current?.dispose();
+      loopRef.current = null;
       ro.disconnect();
     };
   }, []);
@@ -265,20 +326,22 @@ export function ChatUpSocketStreamCanvas({ isActive = true }) {
 // STAGE 03: June 2026 (3-Day Sprint)
 // Roasting AI: Google Gemini LLM Prompt-to-Token Streaming Pipeline
 // ============================================================================
-export function RoastingAITokenStreamCanvas({ isActive = true }) {
+export function RoastingAITokenStreamCanvas({ isActive = true, reducedMotion = false }) {
   const canvasRef = useRef(null);
+  const loopRef = useRef(null);
   const isActiveRef = useRef(isActive);
+  const reducedMotionRef = useRef(reducedMotion);
 
   useEffect(() => {
     isActiveRef.current = isActive;
-  }, [isActive]);
+    reducedMotionRef.current = reducedMotion;
+    loopRef.current?.setState(isActive, reducedMotion);
+  }, [isActive, reducedMotion]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let animId;
-
     const parent = canvas.parentElement;
     let width = parent?.clientWidth || 380;
     let height = parent?.clientHeight || 280;
@@ -293,6 +356,7 @@ export function RoastingAITokenStreamCanvas({ isActive = true }) {
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      loopRef.current?.redraw();
     };
     resize();
 
@@ -310,8 +374,6 @@ export function RoastingAITokenStreamCanvas({ isActive = true }) {
     let frame = 0;
 
     const render = () => {
-      animId = requestAnimationFrame(render);
-
       frame++;
       ctx.clearRect(0, 0, width, height);
 
@@ -401,10 +463,12 @@ export function RoastingAITokenStreamCanvas({ isActive = true }) {
       ctx.fillText('STATUS: STREAMING', width - 16, footerY);
     };
 
-    render();
+    loopRef.current = createCanvasLoop(render, true);
+    loopRef.current.setState(isActiveRef.current, reducedMotionRef.current);
 
     return () => {
-      cancelAnimationFrame(animId);
+      loopRef.current?.dispose();
+      loopRef.current = null;
       ro.disconnect();
     };
   }, []);
@@ -416,20 +480,22 @@ export function RoastingAITokenStreamCanvas({ isActive = true }) {
 // STAGE 04: 2026 Production SaaS
 // AI Resume Builder: Decoupled Cloudflare Edge + Gemini ATS Parser (98.4%)
 // ============================================================================
-export function EdgeResumeATSParserCanvas({ isActive = true }) {
+export function EdgeResumeATSParserCanvas({ isActive = true, reducedMotion = false }) {
   const canvasRef = useRef(null);
+  const loopRef = useRef(null);
   const isActiveRef = useRef(isActive);
+  const reducedMotionRef = useRef(reducedMotion);
 
   useEffect(() => {
     isActiveRef.current = isActive;
-  }, [isActive]);
+    reducedMotionRef.current = reducedMotion;
+    loopRef.current?.setState(isActive, reducedMotion);
+  }, [isActive, reducedMotion]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let animId;
-
     const parent = canvas.parentElement;
     let width = parent?.clientWidth || 380;
     let height = parent?.clientHeight || 280;
@@ -444,6 +510,7 @@ export function EdgeResumeATSParserCanvas({ isActive = true }) {
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      loopRef.current?.redraw();
     };
     resize();
 
@@ -458,8 +525,6 @@ export function EdgeResumeATSParserCanvas({ isActive = true }) {
     ];
 
     const render = () => {
-      animId = requestAnimationFrame(render);
-
       ctx.clearRect(0, 0, width, height);
 
       // 1. Top Architecture Gateway Bar
@@ -560,10 +625,12 @@ export function EdgeResumeATSParserCanvas({ isActive = true }) {
       ctx.fillText('VERIFIED', width - 16, footerY);
     };
 
-    render();
+    loopRef.current = createCanvasLoop(render, false);
+    loopRef.current.setState(isActiveRef.current, reducedMotionRef.current);
 
     return () => {
-      cancelAnimationFrame(animId);
+      loopRef.current?.dispose();
+      loopRef.current = null;
       ro.disconnect();
     };
   }, []);

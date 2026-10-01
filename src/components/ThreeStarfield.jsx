@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 const STAR_VERT = `
   uniform float uTime;
@@ -48,27 +49,44 @@ const STAR_FRAG = `
 
 export default function ThreeStarfield({ isHeroPage = false }) {
   const canvasRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
   const isHeroPageRef = useRef(isHeroPage);
+  const reducedMotionRef = useRef(prefersReducedMotion);
+  const renderModeRef = useRef(null);
 
   useEffect(() => {
     isHeroPageRef.current = isHeroPage;
+    renderModeRef.current?.();
   }, [isHeroPage]);
+
+  useEffect(() => {
+    reducedMotionRef.current = prefersReducedMotion;
+    renderModeRef.current?.();
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true
+      });
+    } catch (error) {
+      console.error('WebGL Initialization Error:', error);
+      canvas.dataset.webglFallback = 'true';
+      return;
+    }
+
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x050505, 0.0005); // Fade stars in the distance
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
     camera.position.z = 1000; // Looking down the -Z axis
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true
-    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -123,59 +141,88 @@ export default function ThreeStarfield({ isHeroPage = false }) {
 
     // 2. Animation Loop
     const initTime = performance.now();
-    let animationFrameId;
+    let animationFrameId = null;
+    let refreshRenderMode = () => {};
 
-    const tick = () => {
-      // If on Hero page, starfield is invisible (opacity: 0) — skip rendering completely (0% GPU)
-      if (isHeroPageRef.current) {
-        animationFrameId = requestAnimationFrame(tick);
-        return;
-      }
+    const canRender = () => !isHeroPageRef.current && !document.hidden;
 
-      const elapsedTime = (performance.now() - initTime) * 0.001;
-      
+    const drawFrame = () => {
+      if (!canRender()) return;
+      const reducedMotion = reducedMotionRef.current;
+      const elapsedTime = reducedMotion ? 0 : (performance.now() - initTime) * 0.001;
+
       // Update GPU stars time
       uniforms.uTime.value = elapsedTime;
 
       // Gentle camera sway for life
-      camera.position.x = Math.sin(elapsedTime * 0.2) * 50;
-      camera.position.y = Math.cos(elapsedTime * 0.15) * 30;
+      camera.position.x = reducedMotion ? 0 : Math.sin(elapsedTime * 0.2) * 50;
+      camera.position.y = reducedMotion ? 0 : Math.cos(elapsedTime * 0.15) * 30;
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
-      animationFrameId = requestAnimationFrame(tick);
     };
 
-    tick();
+    const tick = () => {
+      animationFrameId = null;
+      if (!canRender()) return;
+      drawFrame();
+      if (!reducedMotionRef.current) animationFrameId = requestAnimationFrame(tick);
+    };
+
+    refreshRenderMode = () => {
+      if (!canRender()) {
+        if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        return;
+      }
+
+      if (reducedMotionRef.current) {
+        if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        drawFrame();
+      } else if (animationFrameId === null) {
+        animationFrameId = requestAnimationFrame(tick);
+      }
+    };
+    renderModeRef.current = refreshRenderMode;
 
     // 3. Resize Handler
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      refreshRenderMode();
     };
 
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', refreshRenderMode);
 
     // WebGL Context Loss Handlers
     const handleContextLost = (e) => {
       e.preventDefault();
-      cancelAnimationFrame(animationFrameId);
+      canvas.dataset.webglFallback = 'true';
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
     };
     const handleContextRestored = () => {
+      delete canvas.dataset.webglFallback;
       handleResize();
-      tick();
+      refreshRenderMode();
     };
 
     canvas.addEventListener('webglcontextlost', handleContextLost, false);
     canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
+    refreshRenderMode();
 
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', refreshRenderMode);
       canvas.removeEventListener('webglcontextlost', handleContextLost);
       canvas.removeEventListener('webglcontextrestored', handleContextRestored);
-      cancelAnimationFrame(animationFrameId);
+      renderModeRef.current = null;
+      refreshRenderMode = () => {};
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       geometry.dispose();
       starMaterial.dispose();
       renderer.dispose();

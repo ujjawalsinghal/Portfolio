@@ -66,6 +66,14 @@ section {
   pointer-events: none;
 }
 
+#webgl-canvas.webgl-static-fallback {
+  background: radial-gradient(ellipse at 50% 42%, rgba(151, 91, 38, 0.12), transparent 68%);
+}
+
+#three-starfield-canvas[data-webgl-fallback='true'] {
+  background: radial-gradient(ellipse at 50% 42%, rgba(91, 112, 138, 0.12), transparent 72%);
+}
+
 .bg-overlay {
   position: absolute;
   top: 0;

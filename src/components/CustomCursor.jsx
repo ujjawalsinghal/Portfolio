@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 export default function CustomCursor() {
   const coreRef = useRef(null);
   const ringRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
   const [isHovered, setIsHovered] = useState(false);
   const starsRef = useRef([]);
   const lastStarTime = useRef(0);
@@ -15,7 +17,7 @@ export default function CustomCursor() {
     if (!core || !ring) return;
 
     // Only run on desktop (fine pointer)
-    if (window.matchMedia && !window.matchMedia('(pointer: fine)').matches) return;
+    if (prefersReducedMotion || (window.matchMedia && !window.matchMedia('(pointer: fine)').matches)) return;
 
     // ── Initial positions off-screen ──
     gsap.set(core, { xPercent: -50, yPercent: -50, x: -200, y: -200, opacity: 0 });
@@ -112,9 +114,8 @@ export default function CustomCursor() {
 
       // Detect hoverable
       const target = e.target;
-      setIsHovered(
-        !!(target && (target.classList.contains('hoverable') || target.closest('.hoverable')))
-      );
+      const nextHovered = !!(target && (target.classList.contains('hoverable') || target.closest('.hoverable')));
+      setIsHovered((current) => current === nextHovered ? current : nextHovered);
     };
 
     // ── Mouse click ──
@@ -150,11 +151,12 @@ export default function CustomCursor() {
       window.removeEventListener('mousedown', handleMouseDown);
       document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
       document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
+      gsap.killTweensOf([core, ring]);
       // Clean up any remaining star particles
       starsRef.current.forEach(s => s.remove());
       starsRef.current = [];
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <>

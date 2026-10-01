@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 export default function HeroGlobeButton() {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const coreRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
   const navigate = useNavigate();
 
   // 1. Quantum Holographic Wireframe Globe on HTML5 Canvas
@@ -148,7 +150,7 @@ export default function HeroGlobeButton() {
         ctx.shadowBlur = 0;
       });
 
-      animationFrameId = requestAnimationFrame(render);
+      if (!prefersReducedMotion) animationFrameId = requestAnimationFrame(render);
     };
 
     render();
@@ -169,12 +171,12 @@ export default function HeroGlobeButton() {
       canvas.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   // 2. Continuous Floating Levitation
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || prefersReducedMotion) return;
 
     // Subtle continuous floating levitation
     const floatAnim = gsap.to(el, {
@@ -188,7 +190,7 @@ export default function HeroGlobeButton() {
     return () => {
       floatAnim.kill();
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   // 3. Autonomous Portal Click Exit Animation
   const handlePortalClick = (e) => {

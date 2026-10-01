@@ -6,28 +6,41 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { RAY_VERT, RAY_FRAG, COMPOSITE_VERT, COMPOSITE_FRAG } from './shaders.js';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 export default function ThreeBackground({ isHeroPage = true }) {
   const canvasRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
   const [isInteractive, setIsInteractive] = useState(false);
   const isInteractiveRef = useRef(false);
   const isHeroPageRef = useRef(isHeroPage);
+  const reducedMotionRef = useRef(prefersReducedMotion);
+  const renderModeRef = useRef(null);
 
   // Sync refs with state/props for use inside animation loop
   useEffect(() => {
     isInteractiveRef.current = isInteractive;
+    renderModeRef.current?.();
   }, [isInteractive]);
 
   useEffect(() => {
     isHeroPageRef.current = isHeroPage;
+    renderModeRef.current?.();
   }, [isHeroPage]);
+
+  useEffect(() => {
+    reducedMotionRef.current = prefersReducedMotion;
+    renderModeRef.current?.();
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
     let renderer, composer, bloomPass, compositePass, controls;
-    let animationFrameId;
+    let animationFrameId = null;
+    let refreshRenderMode = () => {};
+    let isDrawingFrame = false;
     let lastRenderMs = 0;
     const cpuCores = navigator.hardwareConcurrency || 8;
     const deviceMemory = navigator.deviceMemory || 8;
@@ -42,7 +55,8 @@ export default function ThreeBackground({ isHeroPage = true }) {
       });
     } catch (e) {
       console.error('WebGL Initialization Error:', e);
-      return;
+      canvas.classList.add('webgl-static-fallback');
+      return () => canvas.classList.remove('webgl-static-fallback');
     }
 
     renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
@@ -110,6 +124,7 @@ export default function ThreeBackground({ isHeroPage = true }) {
       uRotSpeed: { value: FIXED_PARAMS.uRotSpeed },
     };
 
+    const fsGeometry = new THREE.PlaneGeometry(2, 2);
     const fsMat = new THREE.ShaderMaterial({
       vertexShader: RAY_VERT,
       fragmentShader: RAY_FRAG,
@@ -117,7 +132,7 @@ export default function ThreeBackground({ isHeroPage = true }) {
       depthTest: false,
       depthWrite: false,
     });
-    fsScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fsMat));
+    fsScene.add(new THREE.Mesh(fsGeometry, fsMat));
 
     // Observer Camera: fixed home view, centred at yaw 0° and pitch 2.5°.
     // This keeps the accretion disk horizontal, like the chosen reference.
@@ -189,6 +204,7 @@ export default function ThreeBackground({ isHeroPage = true }) {
     const handleScroll = () => {
       mouseX = 0;
       mouseY = 0;
+      refreshRenderMode();
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
@@ -282,34 +298,36 @@ export default function ThreeBackground({ isHeroPage = true }) {
       renderer.getDrawingBufferSize(_dbSize);
       uniforms.uRes.value.copy(_dbSize);
       compositePass.uniforms.uRes.value.copy(_dbSize);
+      refreshRenderMode();
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
+    const handleVisibilityChange = () => refreshRenderMode();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     const initTime = performance.now();
 
-    // Render Animation Loop
-    const tick = () => {
-      // If we are not on the hero page, skip rendering entirely to free up 100% of GPU
-      if (!isHeroPageRef.current) {
-        animationFrameId = window.requestAnimationFrame(tick);
-        return;
-      }
+    const canRender = () =>
+      isHeroPageRef.current &&
+      !document.hidden &&
+      (isInteractiveRef.current || window.scrollY < window.innerHeight * 1.05);
 
-      // If user has scrolled past the hero, pause raymarching completely (0% GPU usage)
-      const isHeroVisible = window.scrollY < window.innerHeight * 1.05;
-      if (!isHeroVisible && !isInteractiveRef.current) {
-        animationFrameId = window.requestAnimationFrame(tick);
-        return;
-      }
-
+    const drawFrame = () => {
+      if (!canRender() || isDrawingFrame) return;
+      isDrawingFrame = true;
       const now = performance.now();
-      const elapsedTime = (now - initTime) * 0.001;
+      const reducedMotion = reducedMotionRef.current;
+      const elapsedTime = reducedMotion ? 0 : (now - initTime) * 0.001;
 
       if (isInteractiveRef.current) {
         // Free Orbit Mode: OrbitControls has full 3D authority
         controls.update();
+      } else if (reducedMotion) {
+        smoothMouseX = 0;
+        smoothMouseY = 0;
+        camera.position.set(0, 1.05, 23.98);
+        camera.lookAt(0, 0, 0);
       } else {
         // The non-interactive site smoothly glides with subtle mouse parallax
         smoothMouseX += (mouseX - smoothMouseX) * 0.05;
@@ -339,6 +357,13 @@ export default function ThreeBackground({ isHeroPage = true }) {
       uniforms.uCamTarget.value.set(0, 0, 0);
       compositePass.uniforms.uTime.value = elapsedTime;
 
+      if (reducedMotion) {
+        bloomPass.enabled = halfFloatOK && isInteractiveRef.current;
+        composer.render();
+        isDrawingFrame = false;
+        return;
+      }
+
       // Render smoothly synced with display VSync
       const minFrameMs = isInteractiveRef.current ? 16 : (isLowPowerDevice ? 28 : 16);
       if (now - lastRenderMs >= minFrameMs) {
@@ -346,19 +371,52 @@ export default function ThreeBackground({ isHeroPage = true }) {
         composer.render();
         lastRenderMs = now;
       }
-      animationFrameId = window.requestAnimationFrame(tick);
+      isDrawingFrame = false;
     };
 
-    tick();
+    const tick = () => {
+      animationFrameId = null;
+      if (!canRender()) return;
+      drawFrame();
+      if (!reducedMotionRef.current) {
+        animationFrameId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    const handleControlsChange = () => {
+      if (reducedMotionRef.current && isInteractiveRef.current) drawFrame();
+    };
+    controls.addEventListener('change', handleControlsChange);
+
+    refreshRenderMode = () => {
+      controls.enableDamping = !reducedMotionRef.current;
+      if (!canRender()) {
+        if (animationFrameId !== null) window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        return;
+      }
+
+      if (reducedMotionRef.current) {
+        if (animationFrameId !== null) window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        drawFrame();
+      } else if (animationFrameId === null) {
+        animationFrameId = window.requestAnimationFrame(tick);
+      }
+    };
+    renderModeRef.current = refreshRenderMode;
 
     // WebGL Context Loss Handlers
     const handleContextLost = (e) => {
       e.preventDefault();
-      cancelAnimationFrame(animationFrameId);
+      canvas.classList.add('webgl-static-fallback');
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
     };
     const handleContextRestored = () => {
+      canvas.classList.remove('webgl-static-fallback');
       handleResize();
-      tick();
+      refreshRenderMode();
     };
 
     canvas.addEventListener('webglcontextlost', handleContextLost, false);
@@ -374,11 +432,17 @@ export default function ThreeBackground({ isHeroPage = true }) {
       canvas.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       canvas.removeEventListener('webglcontextlost', handleContextLost);
       canvas.removeEventListener('webglcontextrestored', handleContextRestored);
-      window.cancelAnimationFrame(animationFrameId);
+      renderModeRef.current = null;
+      refreshRenderMode = () => {};
+      if (animationFrameId !== null) window.cancelAnimationFrame(animationFrameId);
+      controls.removeEventListener('change', handleControlsChange);
       if (controls) controls.dispose();
       if (composer) composer.dispose();
+      fsGeometry.dispose();
+      fsMat.dispose();
       if (renderer) renderer.dispose();
     };
   }, []);

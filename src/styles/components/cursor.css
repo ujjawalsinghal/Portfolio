@@ -181,3 +181,11 @@ body:has(.hero-logo:hover) #cursor-core {
   .cursor-star,
   .cursor-nebula-burst { display: none !important; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { cursor: auto !important; }
+  #cursor-core,
+  #cursor-ring,
+  .cursor-star,
+  .cursor-nebula-burst { display: none !important; }
+}

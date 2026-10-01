@@ -90,3 +90,25 @@
     clip: rect(53px, 9999px, 28px, 0);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch-wrapper::before,
+  .glitch-wrapper::after {
+    animation: none !important;
+    opacity: 0;
+  }
+
+  .globe-radar-ring,
+  .scroll-dot,
+  .scroll-hint,
+  .scroll-arrow,
+  .meta-pulse-dot,
+  .telemetry-live-dot,
+  .rocket-side-thruster-plume,
+  .rocket-side-core-flame,
+  .plasma-dot,
+  .loader-text,
+  .prototype-spinner {
+    animation: none !important;
+  }
+}
