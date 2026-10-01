@@ -10,32 +10,32 @@ const categories = [
     tag: 'FRONTEND DEVELOPMENT',
     title: 'Frontend & UI Craft',
     summary: 'Responsive layouts, component architecture, clean styling, and high-fidelity user experiences.',
-    telemetry: 'React • Tailwind CSS • TypeScript',
-    skills: ['HTML5', 'CSS3', 'Tailwind CSS', 'React.js', 'TypeScript', 'Angular', 'SASS']
+    telemetry: 'React • JavaScript • HTML • CSS',
+    skills: ['HTML', 'CSS', 'JavaScript', 'React']
   },
   {
     id: '02',
-    tag: 'BACKEND DEVELOPMENT',
-    title: 'Backend & Server-Side',
-    summary: 'Building robust REST APIs, server-side logic, and scalable backend architectures.',
-    telemetry: 'Node.js • Python • Java',
-    skills: ['Node.js (JavaScript)', 'Python', 'Java (OOP)', 'Express.js', 'REST APIs', 'API Design']
+    tag: 'PROGRAMMING',
+    title: 'Programming & OOP',
+    summary: 'Programming foundations across Python, Java, C, C++, and JavaScript.',
+    telemetry: 'Python • Java • C • C++',
+    skills: ['Python', 'Java', 'C', 'C++', 'JavaScript', 'OOP']
   },
   {
     id: '03',
-    tag: 'DATABASE & STORAGE',
-    title: 'Databases & Data Layers',
-    summary: 'Relational and NoSQL databases, schema design, and efficient data querying patterns.',
-    telemetry: 'SQL • MongoDB • GraphQL',
-    skills: ['SQL', 'NoSQL (MongoDB)', 'GraphQL', 'Database Design', 'ORM Concepts', 'Data Modeling']
+    tag: 'DATABASES & CS',
+    title: 'Data & Core CS',
+    summary: 'Database and core computer science foundations for data-driven software work.',
+    telemetry: 'MySQL • DBMS • DSA',
+    skills: ['MySQL', 'DBMS', 'Data Structures', 'Algorithms', 'DSA', 'OOP']
   },
   {
     id: '04',
     tag: 'AI & MACHINE LEARNING',
     title: 'AI & ML Engineering',
-    summary: 'Machine learning fundamentals, data analysis, and AI-powered application development.',
+    summary: 'Developing machine learning and data-analysis skills through practical projects.',
     telemetry: 'Python • NumPy • Pandas • ML Models',
-    skills: ['Machine Learning', 'NumPy & Pandas', 'Data Visualization', 'Kaggle Datasets', 'AI Integration', 'Prompt Engineering']
+    skills: ['Machine Learning', 'NumPy', 'Pandas', 'Data Visualization', 'AI/ML', 'Data Analysis']
   },
   {
     id: '05',
@@ -43,7 +43,7 @@ const categories = [
     title: 'Tools & Version Control',
     summary: 'Professional development workflows, version control, and collaboration using industry tools.',
     telemetry: 'GitHub • Vercel • Deployment',
-    skills: ['Git & GitHub', 'VS Code', 'Vercel', 'Cloudflare Pages', 'npm / yarn', 'Vite']
+    skills: ['Git', 'GitHub', 'VS Code', 'Vite', 'npm']
   },
   {
     id: '06',
@@ -51,7 +51,7 @@ const categories = [
     title: 'Algorithms & DSA',
     summary: 'Data structures, algorithmic thinking, and competitive problem solving using Java & LeetCode.',
     telemetry: 'Java • DSA • LeetCode',
-    skills: ['Java (OOP)', 'Data Structures', 'Algorithms', 'LeetCode Practice', 'Time Complexity', 'System Design Basics']
+    skills: ['DSA', 'Algorithms', 'Data Structures', 'OOP', 'Time Complexity', 'Problem Solving']
   }
 ];
 
@@ -300,6 +300,15 @@ export default function Skills() {
                   zIndex: visualState.zIndex
                 }}
                 onClick={() => rotateToCard(index)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    rotateToCard(index);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select skill category: ${cat.title}`}
                 onMouseEnter={() => {
                   setIsPaused(true);
                   playHoverSound();
