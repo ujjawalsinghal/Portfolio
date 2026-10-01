@@ -43,13 +43,13 @@ export default function Timeline() {
       title: 'Movie Recommendation System',
       headline: 'Data-driven recommendation project',
       summary:
-        'Developed a movie recommendation system project centered on identifying relevant suggestions through preference patterns and similarity-based analysis. This work reflects a practical, AI/ML-first approach to discovery and user-focused recommendation logic.',
+        'Developed a content-based movie recommendation system using the TMDB 5000 Movies and Credits datasets, with data preparation and similarity-based recommendation logic.',
       metrics: [
         { label: 'Project', value: 'Movie Recs' },
         { label: 'Field', value: 'AI/ML' },
         { label: 'Focus', value: 'Recommendation' }
       ],
-      techStack: ['Python', 'Machine Learning', 'Recommendation Logic', 'Data Analysis'],
+      techStack: ['Python', 'pandas', 'scikit-learn', 'Streamlit'],
       Visualizer: ChatUpSocketStreamCanvas
     },
     {
@@ -61,13 +61,13 @@ export default function Timeline() {
       title: 'CipherCraft+',
       headline: 'Security and cryptography-focused project',
       summary:
-        'Explored a cipher-based software project focused on message transformation, secure patterns, and practical encryption workflows. This stage emphasized structured thinking around system security and applied software design.',
+        'Built an interactive cryptography learning platform covering classical ciphers, modern encryption examples, and hashing through a browser-based interface.',
       metrics: [
         { label: 'Project', value: 'CipherCraft+' },
         { label: 'Field', value: 'Security' },
         { label: 'Focus', value: 'Cryptography' }
       ],
-      techStack: ['Python', 'Security Concepts', 'Cryptography', 'Problem Solving'],
+      techStack: ['HTML', 'CSS', 'JavaScript', 'Cryptography'],
       Visualizer: RoastingAITokenStreamCanvas
     },
     {
@@ -79,13 +79,13 @@ export default function Timeline() {
       title: 'Bank Default Risk Predictor',
       headline: 'Finance-focused predictive modeling project',
       summary:
-        'Built a risk prediction project exploring default likelihood patterns through structured data analysis and machine learning-based forecasting. This focus reflects a practical interest in data-driven decision support and applied AI in finance.',
+        'Built a machine learning project for exploring bank default risk using structured data analysis and predictive modeling.',
       metrics: [
         { label: 'Project', value: 'Risk Predictor' },
         { label: 'Field', value: 'Finance' },
         { label: 'Focus', value: 'Prediction' }
       ],
-      techStack: ['Python', 'Machine Learning', 'Risk Modeling', 'Data Science'],
+      techStack: ['Python', 'Machine Learning', 'Data Analysis', 'Risk Prediction'],
       Visualizer: EdgeResumeATSParserCanvas
     }
   ];

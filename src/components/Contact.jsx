@@ -423,7 +423,7 @@ export default function Contact() {
                   </button>
 
                   {statusMsg && (
-                    <div className="form-status-msg text-glow font-mono">
+                    <div className="form-status-msg text-glow font-mono" role="status" aria-live="polite">
                       {statusMsg}
                     </div>
                   )}

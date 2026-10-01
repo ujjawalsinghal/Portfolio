@@ -7,6 +7,7 @@ export default function ProjectModal({ open, onClose, project }) {
   const overlayRef = useRef(null);
   const panelRef = useRef(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const previousFocusRef = useRef(null);
   const techStack = useMemo(() => project?.techStack ?? [], [project]);
   const features = useMemo(() => project?.features ?? [], [project]);
   const githubUrl = project?.githubUrl;
@@ -53,12 +54,40 @@ export default function ProjectModal({ open, onClose, project }) {
   useEffect(() => {
     if (!open) return;
 
+    previousFocusRef.current = document.activeElement;
+    const panel = panelRef.current;
+    requestAnimationFrame(() => panel?.querySelector('.project-modal-close')?.focus());
+
     const onKeyDown = (e) => {
-      if (e.key === 'Escape') onClose?.();
+      if (e.key === 'Escape') {
+        onClose?.();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = panel?.querySelectorAll(
+        'button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
 
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus?.();
+      previousFocusRef.current = null;
+    };
   }, [open, onClose]);
 
   if (!open || !project) return null;

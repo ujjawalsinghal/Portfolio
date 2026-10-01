@@ -98,7 +98,7 @@ export default function Navbar({ isHeroPage }) {
   return (
     <>
       <div
-        className={`hero-logo ${!isHeroPage ? 'fade-out' : 'fade-in'}`}
+        className={'hero-logo ' + (!isHeroPage ? 'fade-out' : 'fade-in')}
         style={{
           position: 'fixed',
           top: '2rem',
@@ -118,7 +118,7 @@ export default function Navbar({ isHeroPage }) {
         </Link>
       </div>
 
-      <nav className={`dock-mode ${isHeroPage && isScrolled ? 'nav-hidden' : 'nav-visible'}`}>
+      <nav id="site-navigation" aria-label="Primary navigation" className={'dock-mode ' + (isHeroPage && isScrolled ? 'nav-hidden' : 'nav-visible')}>
         <div className="container nav-inner">
           <Link
             to="/"
@@ -162,15 +162,15 @@ export default function Navbar({ isHeroPage }) {
               aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
               aria-expanded={mobileMenuOpen}
             >
-              <span className={`hamburger-bar ${mobileMenuOpen ? 'open top' : ''}`} />
-              <span className={`hamburger-bar ${mobileMenuOpen ? 'open bot' : ''}`} />
+              <span className={'hamburger-bar ' + (mobileMenuOpen ? 'open top' : '')} />
+              <span className={'hamburger-bar ' + (mobileMenuOpen ? 'open bot' : '')} />
             </button>
           </div>
         </div>
       </nav>
 
       <div
-        className={`mobile-nav-drawer ${mobileMenuOpen ? 'open' : ''}`}
+        className={'mobile-nav-drawer ' + (mobileMenuOpen ? 'open' : '')}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation Menu"
@@ -187,14 +187,14 @@ export default function Navbar({ isHeroPage }) {
           </button>
         </div>
 
-        <div className="mobile-nav-links font-mono">
+        <div className="mobile-nav-links font-mono" id="mobile-navigation-links">
           {navRoutes.map((route) => {
             const isActive = location.pathname === route.path;
             return (
               <Link
                 key={route.path}
                 to={route.path}
-                className={`mobile-nav-item hoverable ${isActive ? 'active' : ''}`}
+                className={'mobile-nav-item hoverable ' + (isActive ? 'active' : '')}
                 onClick={() => {
                   setMobileMenuOpen(false);
                   playClickSound();

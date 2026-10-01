@@ -178,13 +178,14 @@ export default function Layout({ isPreloaderDone }) {
 
   return (
     <>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <CustomCursor />
       <ThreeStarfield isHeroPage={isHeroPage} />
       <ThreeBackground isHeroPage={isHeroPage} />
 
       <Navbar isHeroPage={isHeroPage} />
       
-      <main className="page-transition-wrapper">
+      <main id="main-content" className="page-transition-wrapper" tabIndex={-1}>
         <Outlet />
         
         {hasNext && nextRoute && (
