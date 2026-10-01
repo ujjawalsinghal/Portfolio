@@ -84,6 +84,16 @@
   flex: 0 0 auto;
 }
 
+.project-card:focus-visible,
+.project-modal-close:focus-visible,
+.project-modal-tab-btn:focus-visible,
+.project-modal-action-btn:focus-visible,
+.project-modal-nav-btn:focus-visible,
+.project-modal-thumb:focus-visible {
+  outline: 2px solid rgba(147, 197, 253, 0.9);
+  outline-offset: 2px;
+}
+
 .project-modal-close:hover {
   border-color: #fff;
   background: rgba(255, 255, 255, 0.12);
