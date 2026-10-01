@@ -5,6 +5,8 @@ import MaskedTitle from './MaskedTitle';
 
 export default function Contact() {
   const monolithRef = useRef(null);
+  const requestInFlightRef = useRef(false);
+  const honeypotRef = useRef(null);
   const { playHoverSound, playClickSound } = useAudio();
 
   const [formData, setFormData] = useState({
@@ -54,38 +56,52 @@ export default function Contact() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    if (requestInFlightRef.current) return;
     playClickSound();
 
-    if (!formData.senderName || !formData.senderMessage) {
+    const senderName = formData.senderName.trim();
+    const senderEmail = formData.senderEmail.trim();
+    const senderMessage = formData.senderMessage.trim();
+
+    if (!senderName || !senderMessage) {
       setStatusMsg('Please enter your name and message.');
       return;
     }
 
+    if (senderName.length > 100 || senderMessage.length > 5000) {
+      setStatusMsg('Please shorten your name or message and try again.');
+      return;
+    }
+
+    if (senderEmail.length > 254 || (senderEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail))) {
+      setStatusMsg('Please enter a valid email address.');
+      return;
+    }
+
     // Begin the rocket flight and 0-100% counter sequence
+    requestInFlightRef.current = true;
     setSendState('launching');
     setLaunchProgress(0);
     setStatusMsg('');
 
-    // Dispatch real backend email transmission via Resend
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 10_000);
     const sendPromise = fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
-        senderName: formData.senderName,
-        senderEmail: formData.senderEmail,
-        senderMessage: formData.senderMessage,
+        senderName,
+        senderEmail,
+        senderMessage,
+        website: honeypotRef.current?.value || '',
       }),
     })
-      .then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(data?.error || 'Email dispatch failed.');
-        }
-        return data;
-      })
-      .catch((err) => {
-        console.error('Backend email delivery error:', err);
-        throw err;
+      .then((res) => res.ok)
+      .catch(() => false)
+      .finally(() => {
+        window.clearTimeout(timeoutId);
+        requestInFlightRef.current = false;
       });
 
     const startTime = performance.now();
@@ -99,20 +115,18 @@ export default function Contact() {
       if (progress < 100) {
         requestAnimationFrame(step);
       } else {
-        // Rocket has reached its destination! Verify backend dispatch result
-        sendPromise
-          .then(() => {
-            setTimeout(() => {
+        // Finish the flight only after the request outcome is known.
+        sendPromise.then((sent) => {
+          setTimeout(() => {
+            if (sent) {
               setSendState('sent');
               playClickSound();
-            }, 300);
-          })
-          .catch((err) => {
-            setTimeout(() => {
+            } else {
               setSendState('idle');
-              setStatusMsg(err.message || 'Transmission failed. Please try again or use direct email.');
-            }, 500);
-          });
+              setStatusMsg('Unable to send your message right now. Please try again later.');
+            }
+          }, sent ? 300 : 500);
+        });
       }
     };
 
@@ -324,7 +338,31 @@ export default function Contact() {
                 </div>
 
                 {/* Dispatch Form */}
-                <form className="contact-form" onSubmit={handleFormSubmit}>
+                <form className="contact-form" onSubmit={handleFormSubmit} noValidate>
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      width: '1px',
+                      height: '1px',
+                      padding: 0,
+                      margin: '-1px',
+                      overflow: 'hidden',
+                      clip: 'rect(0, 0, 0, 0)',
+                      whiteSpace: 'nowrap',
+                      border: 0,
+                    }}
+                  >
+                    <label htmlFor="contact-website">Leave this field empty</label>
+                    <input
+                      ref={honeypotRef}
+                      id="contact-website"
+                      name="website"
+                      type="text"
+                      autoComplete="off"
+                      tabIndex={-1}
+                    />
+                  </div>
                   <div className="form-field">
                     <label className="field-label text-gray uppercase" htmlFor="sender-name">
                       Your Name
@@ -337,6 +375,7 @@ export default function Contact() {
                       value={formData.senderName}
                       onFocus={playHoverSound}
                       onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
+                      maxLength={100}
                       required
                     />
                   </div>
@@ -353,6 +392,7 @@ export default function Contact() {
                       value={formData.senderEmail}
                       onFocus={playHoverSound}
                       onChange={(e) => setFormData({ ...formData, senderEmail: e.target.value })}
+                      maxLength={254}
                     />
                   </div>
 
@@ -368,6 +408,7 @@ export default function Contact() {
                       value={formData.senderMessage}
                       onFocus={playHoverSound}
                       onChange={(e) => setFormData({ ...formData, senderMessage: e.target.value })}
+                      maxLength={5000}
                       required
                     />
                   </div>

@@ -6,40 +6,69 @@ export default {
 
     // 1. API Route: /api/send-email
     if (url.pathname === '/api/send-email') {
-      if (request.method === 'OPTIONS') {
-        return new Response(null, {
-          status: 204,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-          },
-        });
-      }
+      const jsonResponse = (body, status = 200) => new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const inputError = () => jsonResponse({
+        success: false,
+        error: 'Please check your name, email, and message and try again.',
+      }, 400);
+      const serverError = () => jsonResponse({
+        success: false,
+        error: 'Unable to send your message right now. Please try again later.',
+      }, 500);
 
       if (request.method !== 'POST') {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Method not allowed' }),
-          { status: 405, headers: { 'Content-Type': 'application/json' } }
-        );
+        return jsonResponse({ success: false, error: 'Method not allowed.' }, 405);
       }
 
       try {
-        const payload = await request.json().catch(() => ({}));
-        const { senderName, senderEmail, senderMessage } = payload || {};
-
-        if (!senderName?.trim()) {
-          return new Response(
-            JSON.stringify({ success: false, error: 'Name is required.' }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } }
-          );
+        let payload;
+        try {
+          payload = await request.json();
+        } catch {
+          return inputError();
         }
 
-        if (!senderMessage?.trim()) {
-          return new Response(
-            JSON.stringify({ success: false, error: 'Message is required.' }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } }
-          );
+        if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+          return inputError();
+        }
+
+        const { senderName, senderEmail, senderMessage, website } = payload;
+
+        if (website !== undefined && typeof website !== 'string') {
+          return inputError();
+        }
+
+        if (website?.trim()) {
+          return jsonResponse({ success: true });
+        }
+
+        if (
+          typeof senderName !== 'string' ||
+          typeof senderMessage !== 'string' ||
+          (senderEmail !== undefined && typeof senderEmail !== 'string')
+        ) {
+          return inputError();
+        }
+
+        const cleanName = senderName.trim();
+        const cleanMessage = senderMessage.trim();
+        const cleanEmail = senderEmail?.trim() || '';
+
+        if (
+          senderName.length > 100 ||
+          senderMessage.length > 5000 ||
+          (senderEmail?.length ?? 0) > 254 ||
+          !cleanName ||
+          cleanName.length > 100 ||
+          !cleanMessage ||
+          cleanMessage.length > 5000 ||
+          cleanEmail.length > 254 ||
+          (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail))
+        ) {
+          return inputError();
         }
 
         const nodeProcess = typeof globalThis !== 'undefined' ? globalThis.process : undefined;
@@ -52,30 +81,16 @@ export default {
           '';
 
         if (!apiKey) {
-          console.error('RESEND_API_KEY is not configured in Cloudflare environment.');
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: 'Server configuration error: RESEND_API_KEY is not set on Cloudflare.',
-            }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
-          );
+          console.error('Email service configuration is incomplete.');
+          return serverError();
         }
 
         if (!recipientEmail) {
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: 'No contact recipient is configured. Set CONTACT_EMAIL in the environment.',
-            }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
-          );
+          console.error('Email service configuration is incomplete.');
+          return serverError();
         }
 
-        const cleanEmail =
-          senderEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail.trim())
-            ? senderEmail.trim()
-            : null;
+        const replyEmail = cleanEmail || null;
 
         const escapeHtml = (str) =>
           str
@@ -85,9 +100,9 @@ export default {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
 
-        const safeName = escapeHtml(senderName.trim());
-        const safeEmail = cleanEmail ? escapeHtml(cleanEmail) : 'Not provided';
-        const safeMessage = escapeHtml(senderMessage.trim());
+        const safeName = escapeHtml(cleanName);
+        const safeEmail = replyEmail ? escapeHtml(replyEmail) : 'Not provided';
+        const safeMessage = escapeHtml(cleanMessage);
 
         const emailHtml = `
           <!DOCTYPE html>
@@ -130,13 +145,13 @@ export default {
         const emailPayload = {
           from: 'Portfolio Contact <onboarding@resend.dev>',
           to: [recipientEmail.trim()],
-          subject: `[Portfolio Inquiry] ${senderName.trim()}`,
+          subject: `[Portfolio Inquiry] ${cleanName.replace(/[\r\n]+/g, ' ')}`,
           html: emailHtml,
-          text: `Name: ${senderName}\nEmail: ${cleanEmail || 'Not provided'}\n\nMessage:\n${senderMessage}`,
+          text: `Name: ${cleanName}\nEmail: ${replyEmail || 'Not provided'}\n\nMessage:\n${cleanMessage}`,
         };
 
-        if (cleanEmail) {
-          emailPayload.reply_to = cleanEmail;
+        if (replyEmail) {
+          emailPayload.reply_to = replyEmail;
         }
 
         const resendRes = await fetch('https://api.resend.com/emails', {
@@ -148,31 +163,15 @@ export default {
           body: JSON.stringify(emailPayload),
         });
 
-        const resendData = await resendRes.json();
-
         if (!resendRes.ok) {
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: resendData?.message || 'Failed to dispatch email via Resend API.',
-            }),
-            { status: resendRes.status, headers: { 'Content-Type': 'application/json' } }
-          );
+          console.error('Resend email delivery failed with status:', resendRes.status);
+          return serverError();
         }
 
-        return new Response(
-          JSON.stringify({
-            success: true,
-            message: 'Email dispatched successfully.',
-            id: resendData?.id,
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
-        );
-      } catch (err) {
-        return new Response(
-          JSON.stringify({ success: false, error: err?.message || 'Server error' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
+        return jsonResponse({ success: true });
+      } catch {
+        console.error('Email dispatch failed.');
+        return serverError();
       }
     }
 
