@@ -1,0 +1,183 @@
+/* ============================================================
+   GALAXY CURSOR — Cosmic nebula crosshair + star trail system
+   ============================================================ */
+
+/* Hide default system cursor site-wide */
+*, *::before, *::after {
+  cursor: none !important;
+}
+
+/* ── Core cursor ring ── */
+#cursor-core {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 30001;
+  will-change: transform;
+
+  /* Cosmic crosshair dot */
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, #60a5fa 50%, transparent 100%);
+  box-shadow:
+    0 0 6px 2px rgba(96, 165, 250, 0.9),
+    0 0 14px 4px rgba(59, 130, 246, 0.6),
+    0 0 28px 8px rgba(139, 92, 246, 0.3);
+
+  transform-origin: center center;
+  transition:
+    width 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease;
+}
+
+#cursor-core.hovered {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle, #ffffff 0%, #a78bfa 60%, transparent 100%);
+  box-shadow:
+    0 0 8px 3px rgba(167, 139, 250, 1),
+    0 0 20px 8px rgba(139, 92, 246, 0.7),
+    0 0 40px 14px rgba(59, 130, 246, 0.4);
+}
+
+/* ── Outer orbital ring ── */
+#cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+  z-index: 30000;
+  will-change: transform;
+
+  border-radius: 50%;
+  border: 1.5px solid rgba(96, 165, 250, 0.55);
+  background: transparent;
+
+  box-shadow:
+    0 0 8px 1px rgba(96, 165, 250, 0.25),
+    inset 0 0 8px 1px rgba(59, 130, 246, 0.1);
+
+  /* Spinning animation */
+  animation: galaxy-ring-spin 4s linear infinite;
+
+  transition:
+    width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    opacity 0.2s ease;
+}
+
+/* ── Outer ring: rotating dashed arc ── */
+#cursor-ring::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px dashed rgba(139, 92, 246, 0.35);
+  animation: galaxy-ring-spin-reverse 7s linear infinite;
+}
+
+/* ── Outer ring: star node at top ── */
+#cursor-ring::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #60a5fa;
+  box-shadow: 0 0 6px 2px rgba(96, 165, 250, 0.8);
+}
+
+#cursor-ring.hovered {
+  width: 56px;
+  height: 56px;
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow:
+    0 0 16px 4px rgba(139, 92, 246, 0.4),
+    inset 0 0 16px 4px rgba(139, 92, 246, 0.15);
+  animation: galaxy-ring-spin 2s linear infinite;
+}
+
+/* ── Star trail particles ── */
+.cursor-star {
+  position: fixed;
+  pointer-events: none;
+  z-index: 29999;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  background: radial-gradient(circle, #ffffff 0%, #93c5fd 50%, transparent 100%);
+  animation: star-fade 0.7s ease-out forwards;
+}
+
+/* ── Nebula splash on click ── */
+.cursor-nebula-burst {
+  position: fixed;
+  pointer-events: none;
+  z-index: 29998;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: nebula-burst 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(96, 165, 250, 0.6) 30%,
+    rgba(139, 92, 246, 0.3) 60%,
+    transparent 100%
+  );
+}
+
+/* ── Keyframes ── */
+@keyframes galaxy-ring-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes galaxy-ring-spin-reverse {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+@keyframes star-fade {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+}
+
+@keyframes nebula-burst {
+  0%   { opacity: 0.9; transform: translate(-50%, -50%) scale(0); }
+  60%  { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+
+/* ── Navbar / hero region: slim subtle ring ── */
+body:has(nav:hover) #cursor-ring,
+body:has(.hero-logo:hover) #cursor-ring {
+  width: 30px !important;
+  height: 30px !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: none !important;
+}
+
+body:has(nav:hover) #cursor-core,
+body:has(.hero-logo:hover) #cursor-core {
+  box-shadow:
+    0 0 4px 1px rgba(255, 255, 255, 0.6),
+    0 0 10px 3px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ── Mobile: disable custom cursor ── */
+@media (max-width: 768px), (pointer: coarse), (hover: none) {
+  * { cursor: auto !important; }
+  #cursor-core,
+  #cursor-ring,
+  .cursor-star,
+  .cursor-nebula-burst { display: none !important; }
+}
