@@ -118,7 +118,7 @@ export default function Navbar({ isHeroPage }) {
         </Link>
       </div>
 
-      <nav className={`dock-mode ${isHeroPage && isScrolled ? 'nav-hidden' : 'nav-visible'}`}>
+      <nav id="site-navigation" aria-label="Primary navigation" className={`dock-mode ${isHeroPage && isScrolled ? 'nav-hidden' : 'nav-visible'`}>
         <div className="container nav-inner">
           <Link
             to="/"
@@ -187,7 +187,7 @@ export default function Navbar({ isHeroPage }) {
           </button>
         </div>
 
-        <div className="mobile-nav-links font-mono">
+        <div className="mobile-nav-links font-mono" id="mobile-navigation-links">
           {navRoutes.map((route) => {
             const isActive = location.pathname === route.path;
             return (
